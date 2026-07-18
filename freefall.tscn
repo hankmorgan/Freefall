@@ -1,5 +1,17 @@
-[gd_scene format=3 uid="uid://b6yog4gwji4wk"]
+[gd_scene load_steps=3 format=3 uid="uid://b6yog4gwji4wk"]
+
+[ext_resource type="Script" path="res://src/main.cs" id="1_b4y2i"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_4eelw"]
 
 [node name="root" type="Node3D"]
+script = ExtResource("1_b4y2i")
 
 [node name="Planet" type="Node3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Planet"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.06426)
+mesh = SubResource("CylinderMesh_4eelw")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.13332)
