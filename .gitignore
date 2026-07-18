@@ -427,3 +427,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Godot 4+ specific ignores
+.godot/
+/android/

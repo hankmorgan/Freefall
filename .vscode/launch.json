@@ -1,0 +1,36 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    //$env:GODOT = 'C:\Godot_v4.1.1-stable_mono_win64\Godot_v4.1.1-stable_mono_win64.exe'  or whatever this path is for you. Set in system->environment variables
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "name": "Freefall .NET Core Launch (console)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${env:GODOT}",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Freefall .NET Core Attach",
+            "type": "coreclr",
+            "request": "attach"
+        },
+        {
+            "name": "Freefall .NET Core Launch without build (console)",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${env:GODOT}",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ]
+}
