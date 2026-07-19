@@ -1,4 +1,5 @@
 
+using System.IO;
 using Godot;
 
 
@@ -137,6 +138,37 @@ namespace FreeFall
             }
         }
 
+        public static bool DumpPlanet(string planetresfile, string planetname)
+        {
 
-    }
-}
+            var GreyScaleIndexPalette = new Palette();
+            for (int i = 0; i <= GreyScaleIndexPalette.blue.GetUpperBound(0); i++)
+            {
+                GreyScaleIndexPalette.red[i] = (byte)i;
+                GreyScaleIndexPalette.blue[i] = 0;
+                GreyScaleIndexPalette.green[i] = 0;              
+            }
+
+            byte[] archive_ark;
+            if (ReadStreamFile(planetresfile, out archive_ark))
+            {
+                Resloader.Chunk tex_ark;
+                if (!Resloader.LoadChunk(archive_ark, 48, out tex_ark))
+                {
+                    return false;
+                }
+                int addr_ptr = 0;
+                for (int i = 0; i<=63;i++)
+                {
+                    var img = Artloader.Image(databuffer: tex_ark.data, dataOffSet: addr_ptr, width: 64, height: 64, palette: GreyScaleIndexPalette, useAlphaChannel: false, useSingleRedChannel: true );
+                    img.GetImage().SavePng($"c:\\temp\\tnova\\textures\\{planetname}_{i.ToString("d2")}.png");
+                    addr_ptr += (64*64);
+                }
+
+
+                //File.WriteAllBytes("c:\\temp\\tnova\\test.dat", tex_ark.data);
+            }
+            return true;
+        }
+    }//end class
+}//end 

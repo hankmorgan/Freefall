@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 
 namespace FreeFall
 {
@@ -10,9 +11,9 @@ namespace FreeFall
     {
         public struct Chunk
         {
-            public long chunkUnpackedLength;
+            public int chunkUnpackedLength;
             public int chunkCompressionType;//compression type
-            public long chunkPackedLength;
+            public int chunkPackedLength;
             public int chunkContentType;
             public byte[] data;
         };
@@ -45,14 +46,14 @@ namespace FreeFall
             //Util to return an uncompressed shock block. Will use this for all future lookups and replace old ones
 
 
-            int chunkId;
+            //int chunkId;
             //  long chunkUnpackedLength;
             //int chunkType=Compressed;//compression type
             //long chunkPackedLength;
             //long chunkContentType;
-            long filepos;
+            //long filepos;
             //  long AddressOfBlockStart=0;
-            long address_pointer = 4;
+            //long address_pointer = 4;
             //int blnLevelFound=0;    
 
 
@@ -243,38 +244,40 @@ namespace FreeFall
 
         // End of Jim Cameron's procedure
 
-        static long getResBlockAddress(long BlockNo, byte[] tmp_ark, ref long chunkPackedLength, ref long chunkUnpackedLength, ref int chunkCompressionType, ref int chunkContentType)
+        /// <summary>
+        /// Finds the target block in the .res file.
+        /// </summary>
+        /// <param name="TargetBlockNo"></param>
+        /// <param name="tmp_ark"></param>
+        /// <param name="chunkPackedLength"></param>
+        /// <param name="chunkUnpackedLength"></param>
+        /// <param name="chunkCompressionType"></param>
+        /// <param name="chunkContentType"></param>
+        /// <returns></returns>
+        static int getResBlockAddress(long TargetBlockNo, byte[] tmp_ark, ref int chunkPackedLength, ref int chunkUnpackedLength, ref int chunkCompressionType, ref int chunkContentType)
         {
             //Finds the address of the block based on the directory block no.
             //Justs loops through until it finds a match.
-            bool blnLevelFound=false; //= 0;
-            long DirectoryAddress = getAt(tmp_ark, 124, 32);
-            //printf("\nThe directory is at %d\n", DirectoryAddress);
+            bool blnBlockFound = false;
+            var DirectoryAddress = getAt(tmp_ark, 124, 32);
+            var NoOfChunks = (int)getAt(tmp_ark, DirectoryAddress, 16);
+            var firstChunkAddress = (int)getAt(tmp_ark, DirectoryAddress + 2, 32);
 
-            int NoOfChunks = (int)getAt(tmp_ark, DirectoryAddress, 16);
-            //printf("there are %d chunks\n",NoOfChunks);
-            long firstChunkAddress = getAt(tmp_ark, DirectoryAddress + 2, 32);
-            //printf("The first chunk is at %d\n", firstChunkAddress);
-            long address_pointer = DirectoryAddress + 6;
-            long AddressOfBlockStart = firstChunkAddress;
+            var address_pointer = DirectoryAddress + 6;
+            var AddressOfBlockStart = firstChunkAddress;
             for (int k = 0; k < NoOfChunks; k++)
             {
                 int chunkId = (int)getAt(tmp_ark, address_pointer, 16);
-                chunkUnpackedLength = getAt(tmp_ark, address_pointer + 2, 24);
+                chunkUnpackedLength = (int)getAt(tmp_ark, address_pointer + 2, 24);
                 chunkCompressionType = (int)getAt(tmp_ark, address_pointer + 5, 8);  //Compression.
-                chunkPackedLength = getAt(tmp_ark, address_pointer + 6, 24);
+                chunkPackedLength = (int)getAt(tmp_ark, address_pointer + 6, 24);
                 chunkContentType = (short)getAt(tmp_ark, address_pointer + 9, 8);
-                //Debug.Print($"k {k} Chunk {chunkId} of length {chunkUnpackedLength}");
-                //printf("Index: %d, Chunk %d, Unpack size %d, compression %d, packed size %d, content type %d\t",
-                //  k,chunkId, *chunkUnpackedLength, *chunkType,*chunkPackedLength,chunkContentType);
-                //printf("Absolute address is %d\n",AddressOfBlockStart);
 
                 //Debug.Log(chunkId + " of type " + chunkContentType + " compress=" + chunkCompressionType + " packed= " + chunkPackedLength + " unpacked=" + chunkUnpackedLength + " at file address " + AddressOfBlockStart);
 
-                //target chunk id is 4005 + level no * 100 for levels
-                if (chunkId == BlockNo)    //4005+ LevelNo*100
+                if (chunkId == TargetBlockNo)
                 {
-                    blnLevelFound = true;
+                    blnBlockFound = true;
                     address_pointer = 0;
                     break;
                 }
@@ -288,7 +291,7 @@ namespace FreeFall
                 address_pointer = address_pointer + 10;
             }
 
-            if (!blnLevelFound)
+            if (!blnBlockFound)
             {
                 //printf("Level not found"); 
                 return -1;
@@ -296,6 +299,46 @@ namespace FreeFall
             else
             {
                 return AddressOfBlockStart;
+            }
+        }
+
+
+        /// <summary>
+        /// Browses the content of a .res file and lists what it contains.
+        /// </summary>
+        /// <param name="resfile"></param>
+        public static void EnumerateResFile(string resfile)
+        {
+            if (System.IO.File.Exists(resfile))
+            {
+                var tmp_ark = File.ReadAllBytes(resfile);
+                if (tmp_ark.Length > 124)
+                {
+                    var DirectoryAddress = getAt(tmp_ark, 124, 32);
+                    var NoOfChunks = (int)getAt(tmp_ark, DirectoryAddress, 16);
+                    var firstChunkAddress = (int)getAt(tmp_ark, DirectoryAddress + 2, 32);
+
+                    var address_pointer = DirectoryAddress + 6;
+                    var AddressOfBlockStart = firstChunkAddress;
+
+                    for (int k = 0; k < NoOfChunks; k++)
+                    {
+                        int chunkId = (int)getAt(tmp_ark, address_pointer, 16);
+                        var chunkUnpackedLength = (int)getAt(tmp_ark, address_pointer + 2, 24);
+                        var chunkCompressionType = (int)getAt(tmp_ark, address_pointer + 5, 8);  //Compression.
+                        var chunkPackedLength = (int)getAt(tmp_ark, address_pointer + 6, 24);
+                        var chunkContentType = (short)getAt(tmp_ark, address_pointer + 9, 8);
+
+                        Debug.Print($"{resfile} has {chunkId} of type {chunkContentType} compression={chunkCompressionType} packedlength={chunkPackedLength} unpacked={chunkUnpackedLength} at file address {AddressOfBlockStart}");
+
+                        AddressOfBlockStart = AddressOfBlockStart + chunkPackedLength;
+                        if ((AddressOfBlockStart % 4) != 0)
+                            AddressOfBlockStart = AddressOfBlockStart + 4 - (AddressOfBlockStart % 4); // chunk offsets always fall on 4-byte boundaries
+
+
+                        address_pointer = address_pointer + 10;
+                    }
+                }
             }
         }
 

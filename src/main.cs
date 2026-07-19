@@ -10,10 +10,19 @@ public partial class main : Node
 		var files = System.IO.Directory.EnumerateFiles("c:\\games\\tnova\\TNF108\\MAPS\\", "*.res");
 		foreach (var file in files)
 		{
-			var output = Path.Combine("c:\\temp\\tnova", $"{System.IO.Path.GetFileNameWithoutExtension(file)}.png");
-			TNovaMapLoader.BuildTNovaMap(file, output);	
+			var output = Path.Combine(path1: "c:\\temp\\tnova", path2: $"{System.IO.Path.GetFileNameWithoutExtension(file)}.png");
+			//TNovaMapLoader.BuildTNovaMap(file, output);	
 		}
 		
+		//var enumoptions = new EnumerationOptions();
+		//enumoptions.RecurseSubdirectories = true;
+		files = System.IO.Directory.EnumerateFiles(path: "c:\\games\\tnova\\data", searchPattern: "*.res");//, enumerationOptions: enumoptions);
+		foreach (var file in files)
+		{
+			//Resloader.EnumerateResFile(file);
+		}
+
+		TNovaMapLoader.DumpPlanet("c:\\games\\tnova\\data\\RESPLNT0.RES", "planet0");
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
