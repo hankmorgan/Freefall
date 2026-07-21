@@ -6,6 +6,8 @@ For now all this project is aiming to do is
 
 - [x] Read Terra Nova Map Files.
 - [ ] Read Terra Nova Textures and Art.
+  - [ ] Textures - Can load with presupplied palettes
+  - [ ] Palettes - BLOCKED
 - [ ] Render a Terra Nova Level.
 
 

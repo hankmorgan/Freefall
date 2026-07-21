@@ -1,13 +1,15 @@
 using Godot;
-using System;
+
 using FreeFall;
 using System.IO;
-using System.Diagnostics;
+
 public partial class main : Node
 {
+	public static main instance;
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		instance = this;
 		var files = System.IO.Directory.EnumerateFiles("c:\\games\\tnova\\TNF108\\MAPS\\", "*.res");
 		foreach (var file in files)
 		{
@@ -71,9 +73,14 @@ public partial class main : Node
 		}
 
 		//PaletteLoader.LoadPalette(palettefile: "c:\\games\\tnova\\data\\RESGAME.RES", chunkid: 351, 0);
-		// TNovaMapLoader.DumpPlanet(
-		// 	planetresfile: "c:\\games\\tnova\\data\\RESPLNT0.RES",
-		// 	planetname: "planet0");
+
+		TNovaMapLoader.LoadTNovaMap("c:\\games\\tnova\\TNF108\\MAPS\\COAST.RES");
+		//a compliant loader will pull the plant from the map file.
+		TNovaMapLoader.LoadPlanetTextures(
+			planetresfile: "c:\\games\\tnova\\data\\RESPLNT0.RES",
+			planetname: "planet0");
+
+		TilemapRender.RenderTileMap(TNovaMapLoader.height, TNovaMapLoader.texture);
 
 		//Resloader.FindDataInRes("c:\\games\\tnova\\PLNT0.PAL", "c:\\games\\tnova\\data\\RESGAME.RES", 255 * 3);
 		//palchunk_351.dat

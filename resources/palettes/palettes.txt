@@ -1,1 +1,1 @@
-These palettes have been sourced from the gigamap Terra Nova Map extractor. I have no idea where the actual source data is located within the Terra Nova Game Files.
+These palettes have been sourced from the gigamap Terra Nova Map extractor. I have no idea where the actual source data is located within the Terra Nova Game Files

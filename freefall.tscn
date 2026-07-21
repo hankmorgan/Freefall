@@ -1,10 +1,11 @@
-[gd_scene load_steps=3 format=3 uid="uid://b6yog4gwji4wk"]
+[gd_scene load_steps=4 format=3 uid="uid://b6yog4gwji4wk"]
 
 [ext_resource type="Script" path="res://src/main.cs" id="1_b4y2i"]
+[ext_resource type="Script" path="res://addons/sk_fly_camera/src/fly_camera.gd" id="2_e31jp"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_4eelw"]
 
-[node name="root" type="Node3D"]
+[node name="Freefall" type="Node3D"]
 script = ExtResource("1_b4y2i")
 
 [node name="Planet" type="Node3D" parent="."]
@@ -13,5 +14,7 @@ script = ExtResource("1_b4y2i")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.06426)
 mesh = SubResource("CylinderMesh_4eelw")
 
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.13332)
+[node name="CharacterBody3D" type="CharacterBody3D" parent="."]
+script = ExtResource("2_e31jp")
+
+[node name="Camera3D" type="Camera3D" parent="CharacterBody3D"]

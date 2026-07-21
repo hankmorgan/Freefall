@@ -1,9 +1,9 @@
 using Godot;
 namespace FreeFall
-{
-
+{    
     public class Artloader : Loader
     {
+        
         public static ImageTexture Image(
             byte[] databuffer,
             long dataOffSet,
@@ -47,6 +47,7 @@ namespace FreeFall
                     iCol++;
                 }
             }
+            
             var tex = new ImageTexture();
             tex.SetImage(img);
             return tex;
