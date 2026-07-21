@@ -76,9 +76,9 @@ namespace FreeFall
                 {
                     for (int y = 0; y <= height.GetUpperBound(1); y++)
                     {
-                        var normaliseheight = (float)(height[x,y] - minHeight);
+                        var normaliseheight = (float)(height[x, y] - minHeight);
                         var color = new Godot.Color(r: normaliseheight / normalisemaxheight, g: 0, b: 0);
-                        img.SetPixel(x,y,color);
+                        img.SetPixel(x, y, color);
                     }
                 }
 
@@ -138,18 +138,29 @@ namespace FreeFall
             }
         }
 
-        public static bool DumpPlanet(string planetresfile, string planetname)
+        public static bool DumpPlanet(string planetresfile, string planetname, Palette overridepal = null)
         {
-
-            var GreyScaleIndexPalette = new Palette();
-            for (int i = 0; i <= GreyScaleIndexPalette.blue.GetUpperBound(0); i++)
+            var p = File.ReadAllBytes("C:\\Games\\TNOVA\\PLNT0.PAL");
+            Palette GreyScaleIndexPalette;// = new Palette();
+            if (overridepal == null)
             {
-                GreyScaleIndexPalette.red[i] = (byte)i;
-                GreyScaleIndexPalette.blue[i] = 0;
-                GreyScaleIndexPalette.green[i] = 0;              
+                GreyScaleIndexPalette = new Palette();
+                for (int i = 0; i <= GreyScaleIndexPalette.blue.GetUpperBound(0); i++)
+                {
+                    GreyScaleIndexPalette.red[i] = p[(i * 3) + 0];// (byte)i;
+                    GreyScaleIndexPalette.green[i] = p[(i * 3) + 1];// 0;
+                    GreyScaleIndexPalette.blue[i] = p[(i * 3) + 2];// 0;                              
+                }
+            }
+            else
+            {
+                GreyScaleIndexPalette = overridepal;
             }
 
+
+
             byte[] archive_ark;
+
             if (ReadStreamFile(planetresfile, out archive_ark))
             {
                 Resloader.Chunk tex_ark;
@@ -158,11 +169,11 @@ namespace FreeFall
                     return false;
                 }
                 int addr_ptr = 0;
-                for (int i = 0; i<=63;i++)
+                for (int i = 0; i <= 63; i++)
                 {
-                    var img = Artloader.Image(databuffer: tex_ark.data, dataOffSet: addr_ptr, width: 64, height: 64, palette: GreyScaleIndexPalette, useAlphaChannel: false, useSingleRedChannel: true );
+                    var img = Artloader.Image(databuffer: tex_ark.data, dataOffSet: addr_ptr, width: 64, height: 64, palette: GreyScaleIndexPalette, useAlphaChannel: false, useSingleRedChannel: false);
                     img.GetImage().SavePng($"c:\\temp\\tnova\\textures\\{planetname}_{i.ToString("d2")}.png");
-                    addr_ptr += (64*64);
+                    addr_ptr += (64 * 64);
                 }
 
 

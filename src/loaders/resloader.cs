@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
@@ -45,19 +46,6 @@ namespace FreeFall
         {
             //Util to return an uncompressed shock block. Will use this for all future lookups and replace old ones
 
-
-            //int chunkId;
-            //  long chunkUnpackedLength;
-            //int chunkType=Compressed;//compression type
-            //long chunkPackedLength;
-            //long chunkContentType;
-            //long filepos;
-            //  long AddressOfBlockStart=0;
-            //long address_pointer = 4;
-            //int blnLevelFound=0;    
-
-
-
             //Find the address of the block. This will also return the file size.
             //AddressOfBlockStart = getShockBlockAddress(ChunkNo,archive_ark,&chunkPackedLength,&chunkUnpackedLength,&chunkType);   
             if (AddressOfBlockStart == -1) { return -1; }
@@ -65,17 +53,16 @@ namespace FreeFall
             //if (chunkType ==1)
             switch (chunkType)
             {
-                case 0:
-                    {//Flat uncompressed
+                case 0://Flat uncompressed
+                    {
                         for (long k = 0; k < chunkUnpackedLength; k++)
                         {
                             OutputChunk[k] = archive_ark[AddressOfBlockStart + k];
                         }
                         return chunkUnpackedLength;
                     }
-                case 1:
-                    {//flat Compressed
-                     //printf("\nCompressed chunk");
+                case 1://flat Compressed
+                    {
                         byte[] temp_ark = new byte[chunkPackedLength];
                         for (long k = 0; k < chunkPackedLength; k++)
                         {
@@ -86,9 +73,9 @@ namespace FreeFall
                         return chunkUnpackedLength;
                     }
 
-                case 3://Subdir compressed  //Just return the compressed data and unpack the sub chunks individually?
+                case 3://Subdir compressed
                     {
-                        //uncompressed the sub chunks
+                        //uncompress the sub chunks
                         int NoOfEntries = (int)getAt(archive_ark, AddressOfBlockStart, 16);
                         int SubDirLength = (NoOfEntries + 1) * 4 + 2;
                         byte[] temp_ark = new byte[chunkPackedLength];
@@ -109,14 +96,9 @@ namespace FreeFall
                         }
                         return chunkUnpackedLength;
                     }
-                case 2://Subdir uncompressed
-                       //{
-                       //printf("Uncompressed subdir!");
-                       //}
-                default:
-                    {//Uncompressed. 
-                     //printf("\nUncompressed chunk");
-                     //OutputChunk =  new unsigned char[chunkUnpackedLength];
+                case 2://Subdir uncompressed, return the data to be loaded seperately.
+                default://Uncompressed. 
+                    {                        
                         for (long k = 0; k < chunkUnpackedLength; k++)
                         {
                             OutputChunk[k] = archive_ark[AddressOfBlockStart + k];
@@ -307,8 +289,9 @@ namespace FreeFall
         /// Browses the content of a .res file and lists what it contains.
         /// </summary>
         /// <param name="resfile"></param>
-        public static void EnumerateResFile(string resfile)
+        public static List<int> EnumerateResFile(string resfile)
         {
+            var result = new List<int>();
             if (System.IO.File.Exists(resfile))
             {
                 var tmp_ark = File.ReadAllBytes(resfile);
@@ -324,12 +307,16 @@ namespace FreeFall
                     for (int k = 0; k < NoOfChunks; k++)
                     {
                         int chunkId = (int)getAt(tmp_ark, address_pointer, 16);
+                        result.Add(chunkId);
                         var chunkUnpackedLength = (int)getAt(tmp_ark, address_pointer + 2, 24);
                         var chunkCompressionType = (int)getAt(tmp_ark, address_pointer + 5, 8);  //Compression.
                         var chunkPackedLength = (int)getAt(tmp_ark, address_pointer + 6, 24);
                         var chunkContentType = (short)getAt(tmp_ark, address_pointer + 9, 8);
-
-                        Debug.Print($"{resfile} has {chunkId} of type {chunkContentType} compression={chunkCompressionType} packedlength={chunkPackedLength} unpacked={chunkUnpackedLength} at file address {AddressOfBlockStart}");
+                        //if ((chunkUnpackedLength == 1024) ||  (chunkUnpackedLength == 768))
+                        // {
+                        //var diff = AddressOfBlockStart - 0x8D78D;
+                        //Debug.Print($"{resfile} has {chunkId} of type {chunkContentType} compression={chunkCompressionType} packedlength={chunkPackedLength} unpacked={chunkUnpackedLength} at file address 0x{AddressOfBlockStart.ToString("x").ToUpper()} {diff}");
+                        // }                        
 
                         AddressOfBlockStart = AddressOfBlockStart + chunkPackedLength;
                         if ((AddressOfBlockStart % 4) != 0)
@@ -340,6 +327,53 @@ namespace FreeFall
                     }
                 }
             }
+            return result;
+        }
+
+        public static bool FindDataInRes(string ToFind, string ResFile, int datalen)
+        {
+            byte[] finddata; byte[] resdata;
+            if (ReadStreamFile(Path: ToFind, buffer: out finddata) && ReadStreamFile(Path: ResFile, buffer: out resdata))
+            {
+                var offset = matchdata(ToFind: finddata, ToSearch: resdata, datalen: datalen);
+                if (offset>=0)
+                {
+                    Debug.Print($"match found in {ResFile} at {offset.ToString("x").ToUpper()}");
+                }
+            }
+            return false;
+        }
+
+        public static int matchdata (byte[] ToFind, byte[]ToSearch, int datalen)
+        {
+            for (int o = 0; o <= ToSearch.GetUpperBound(0); o++)
+            {
+                for (int i = 0; i<datalen;i++)
+                {
+                    if (o+i>ToSearch.GetUpperBound(0))
+                    {
+                        return -1;
+                    }
+                    else
+                    {
+                        if (ToFind[i] != ToSearch[o+i])
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            //data matching so far.
+                            if (i+1 == datalen)
+                            {
+                                //all bytes scanned and matching.
+                                Debug.Print($"match found at offset 0x{o.ToString("x").ToUpper()}");
+                                return o;
+                            }
+                        }
+                    }
+                }
+            }
+            return -1;
         }
 
     }//end class
