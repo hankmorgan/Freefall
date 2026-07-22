@@ -80,7 +80,7 @@ public partial class main : Node
 			planetresfile: "c:\\games\\tnova\\data\\RESPLNT0.RES",
 			planetname: "planet0");
 
-		TilemapRender.RenderTileMap(TNovaMapLoader.height, TNovaMapLoader.texture);
+		TilemapRender.RenderTileMap(TNovaMapLoader.height, TNovaMapLoader.texture, TNovaMapLoader.texturecounter);
 
 		//Resloader.FindDataInRes("c:\\games\\tnova\\PLNT0.PAL", "c:\\games\\tnova\\data\\RESGAME.RES", 255 * 3);
 		//palchunk_351.dat

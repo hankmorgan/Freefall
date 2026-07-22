@@ -1,4 +1,5 @@
 
+using System.Collections.Generic;
 using System.IO;
 using Godot;
 
@@ -13,6 +14,7 @@ namespace FreeFall
         const int chunkToLoad = 86;
         public static int[,] height = new int[513, 513];
         public static int[,] texture = new int[513, 513];
+        public static int[] texturecounter = new int[63]; //counts usages of each texture
 
         public static bool LoadTNovaMap(string sourcearkfile, string outputfilename="")
         {
@@ -49,6 +51,7 @@ namespace FreeFall
                             byte0 = byte0 - 64;
 
                         texture[x, y] = byte0;
+                        texturecounter[byte0]++;
 
                         byte1 = byte1 & 0xF0;         //AND with 11110000b: remove shadow+rotation in lower half of byte
                         height[x, y] = (byte2 << 4) | (byte1 >> 4);
