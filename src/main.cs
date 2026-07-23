@@ -74,7 +74,7 @@ public partial class main : Node
 
 		//PaletteLoader.LoadPalette(palettefile: "c:\\games\\tnova\\data\\RESGAME.RES", chunkid: 351, 0);
 
-		TNovaMapLoader.LoadTNovaMap("c:\\games\\tnova\\TNF108\\MAPS\\COAST.RES");
+		TNovaMapLoader.LoadTNovaMap("c:\\games\\tnova\\TNF108\\MAPS\\ARENA.RES", "c:\\temp\\testmap.png");
 		//a compliant loader will pull the plant from the map file.
 		TNovaMapLoader.LoadPlanetTextures(
 			planetresfile: "c:\\games\\tnova\\data\\RESPLNT0.RES",

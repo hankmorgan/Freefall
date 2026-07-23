@@ -10,46 +10,40 @@ namespace FreeFall
 
         static bool[,] hasRendered = new bool[513, 513];
         const int FacesPerBatch = 256;
+        const float brushSize = 1.2f;
         static Shader tileshader;
-        public static void RenderTileMap(int[,] tileheights, int[,] textures, int[] texturecounts)
+        public static void RenderTileMap(int[,] tileheights, int[,] textures, int[,] texturecounts)
         {
             Node3D the_tiles = main.instance.GetNode<Node3D>("/root/Freefall/Planet");
-            //var a_mesh = new ArrayMesh();
             tileshader = (Shader)ResourceLoader.Load("res://resources/shaders/tnovashader.gdshader");
-            int surfIdx = 0;
             //for each tile.
             for (int tex = 0; tex <= texturecounts.GetUpperBound(0); tex++)
             {
-                if (texturecounts[tex] > 0)
+                for (int rot = 0; rot <= 0; rot++)
                 {
-                    // if (tex == 3)
-                    // {
-                        Debug.Print($"Drawing texture {tex}");
+                    if (texturecounts[tex, rot] > 0)
+                    {
                         RenderTerrainTile(
                             the_tiles: the_tiles,
                             tileheights: tileheights,
                             textures: textures,
+                            texturecounts: texturecounts,
                             textureToDraw: tex,
-                            numberOfFaces: texturecounts[tex],
-                            surfIdx: surfIdx);
-                    //}
+                            rotation: rot);
+                    }
                 }
             }
         }
 
 
-        static void RenderTerrainTile(Node3D the_tiles, int[,] tileheights, int[,] textures, int textureToDraw, int numberOfFaces, int surfIdx)
+        static void RenderTerrainTile(Node3D the_tiles, int[,] tileheights, int[,] textures, int[,] texturecounts, int textureToDraw, int rotation)
         {
-            //int debugcount = 0;
-            //var a_mesh = new ArrayMesh();
-            float brushSize = 1.2f;
-
+            int numberOfFaces = texturecounts[textureToDraw, rotation];
             int NoOfLoops = numberOfFaces / FacesPerBatch;
             int remainder = numberOfFaces % FacesPerBatch;
 
-
             int startx = 0; int starty = 0;
-            //int resumex = 0; int resumey = 0;
+
             while (NoOfLoops >= 0)
             {
                 int currNoOfFaces;
@@ -72,8 +66,6 @@ namespace FreeFall
                 int[] indices = new int[6 * currNoOfFaces];
 
 
-                // var material = textures[x, y];
-
                 float[] heights = new float[4];
                 int FaceCounter = 0;
                 bool DrawMesh = false;
@@ -81,20 +73,8 @@ namespace FreeFall
 
                 for (int x = startx; x <= 512; x++)
                 {
-                    //resumex = x;// + 1;
                     for (int y = starty; y <= 512; y++)
                     {
-                        // if ((x == 452) && (y==40))
-                        // {
-                        //     Debug.Print("here");
-                        // }
-                        // if (x==280)
-                        // {
-                        //     Debug.Print($"{debugcount++} drawing at {x}, {y}");  
-                        // }
-                                               
-
-                        //resumey = y;
                         if (textures[x, y] == textureToDraw)
                         {
                             DrawMesh = true;
@@ -137,11 +117,35 @@ namespace FreeFall
                                 verts[3 + (FaceCounter * 4)] = new Vector3(cornerX + brushSize, heights[3], cornerY + 0.0f); // 1, 0
 
 
-                                //These will be rotated later in the shader
-                                uvs[0 + (FaceCounter * 4)] = new Vector2(1.0f, 0.0f);
-                                uvs[1 + (FaceCounter * 4)] = new Vector2(1.0f, 1.0f);
-                                uvs[2 + (FaceCounter * 4)] = new Vector2(0.0f, 1.0f);
-                                uvs[3 + (FaceCounter * 4)] = new Vector2(0.0f, 0.0f);
+                                switch (rotation)
+                                {
+                                    case 3:
+                                        uvs[3 + (FaceCounter * 4)] = new Vector2(0.0f, 0.0f);
+                                        uvs[0 + (FaceCounter * 4)] = new Vector2(+1.0f, 0.0f);
+                                        uvs[1 + (FaceCounter * 4)] = new Vector2(+1.0f, -1.0f);
+                                        uvs[2 + (FaceCounter * 4)] = new Vector2(0.0f, -1.0f);
+                                        break;
+                                    case 2:
+                                        uvs[0 + (FaceCounter * 4)] = new Vector2(0.0f, 0.0f);
+                                        uvs[1 + (FaceCounter * 4)] = new Vector2(+1.0f, 0.0f);
+                                        uvs[2 + (FaceCounter * 4)] = new Vector2(+1.0f, -1.0f);
+                                        uvs[3 + (FaceCounter * 4)] = new Vector2(0.0f, -1.0f);
+                                        break;
+                                    case 1:
+                                        uvs[2 + (FaceCounter * 4)] = new Vector2(0.0f, 0.0f);
+                                        uvs[3 + (FaceCounter * 4)] = new Vector2(+1.0f, 0.0f);
+                                        uvs[0 + (FaceCounter * 4)] = new Vector2(+1.0f, -1.0f);
+                                        uvs[1 + (FaceCounter * 4)] = new Vector2(0.0f, -1.0f);
+                                        break;
+                                    case 0:
+                                    default:
+                                        uvs[1 + (FaceCounter * 4)] = new Vector2(0.0f, 0.0f);
+                                        uvs[2 + (FaceCounter * 4)] = new Vector2(+1.0f, 0.0f);
+                                        uvs[3 + (FaceCounter * 4)] = new Vector2(+1.0f, -1.0f);
+                                        uvs[0 + (FaceCounter * 4)] = new Vector2(0.0f, -1.0f);
+                                        break;
+                                }
+
 
                                 indices[0 + (FaceCounter * 6)] = 1 + (FaceCounter * 4);
                                 indices[1 + (FaceCounter * 6)] = 0 + (FaceCounter * 4);
@@ -155,7 +159,7 @@ namespace FreeFall
                                 FaceCounter++;
                                 if (FaceCounter >= currNoOfFaces)
                                 {
-                                   
+
                                     goto DoDrawMesh;
                                 }
                             }
@@ -163,7 +167,7 @@ namespace FreeFall
                     }
                 }
 
-            //resumex = 0; resumey = 0;
+                //resumex = 0; resumey = 0;
 
             DoDrawMesh:
                 if (DrawMesh)
@@ -174,7 +178,7 @@ namespace FreeFall
                     TilemapRender.DrawMesh(
                         the_tiles: the_tiles,
                         textureToDraw: textureToDraw,
-                        surfIdx: surfIdx,
+                        surfIdx: 0,
                         a_mesh: a_mesh,
                         NoOfLoops: NoOfLoops,
                         verts: verts,
