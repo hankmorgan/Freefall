@@ -4,7 +4,7 @@ namespace FreeFall
 {    
     //nearest palette matches. these match the first 300 or so bytes of the palette but the rest of the data does not match the palettes that were sourced from the gigamap extractor plnt0.pal. Where the palette data currently resides is a mystery.
     //I've ran a byte level search on every res file and unpacked contents and the 
-    // my only theory is the palette is dynamically generated at runtime by combining data from various chunks. The logical location would be in the RESPLNTx.RES files likely candidate is chunk 50 in that res file.
+    // my only theory is the palette is dynamically generated at runtime by combining data from various chunks. The logical location would be in the RESPLNTx.RES files likely candidate is chunk 50 in that res file since that data has a byte level match of some of the palette data.
     //Palette for planet0 is in Resgame/392 at offset 0x8D78D (in file), offset 0x7525 in subchunk
     //Palette for planet1 is in Resgame/351 at offset 0x18FA (in file), offset 0xE0 in subchunk
     //Palette for planet2 is in Resgame/392 at offset 0x8D78D (infile), offset 0x7525 in subchunk

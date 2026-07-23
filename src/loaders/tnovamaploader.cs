@@ -98,9 +98,11 @@ namespace FreeFall
             }
         }
 
-        public static bool LoadPlanetTextures(string planetresfile, string planetname, Palette overridepal = null)
+        public static bool LoadPlanetTextures(string planetresfile, string planetname, Palette overridepal = null, string palettename = "PLNT0.PAL")
         {
-            var p = File.ReadAllBytes("C:\\Games\\TNOVA\\PLNT0.PAL");
+            var p = File.ReadAllBytes($"C:\\Games\\TNOVA\\{palettename}");
+            //var p = ResourceLoader.Load($"res://resources/palettes/{palettename}"); //TODO figure out how to load the bundled .PAL (or ideally find the palette.)
+            
             Palette GreyScaleIndexPalette;// = new Palette();
             if (overridepal == null)
             {

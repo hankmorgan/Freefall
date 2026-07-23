@@ -35,7 +35,7 @@ public partial class main : Node
 
 		var enumoptions = new EnumerationOptions();
 		enumoptions.RecurseSubdirectories = true;
-		files = System.IO.Directory.EnumerateFiles(path: "c:\\games\\tnova\\", searchPattern: "*.res", enumerationOptions: enumoptions);
+		files = System.IO.Directory.EnumerateFiles(path: "c:\\games\\tnova\\", searchPattern: "RESPLNT*.res", enumerationOptions: enumoptions);
 		foreach (var file in files)
 		{
 			var chunks = Resloader.EnumerateResFile(file);

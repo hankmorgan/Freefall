@@ -315,7 +315,8 @@ namespace FreeFall
                         //if ((chunkUnpackedLength == 1024) ||  (chunkUnpackedLength == 768))
                         // {
                         //var diff = AddressOfBlockStart - 0x8D78D;
-                        //Debug.Print($"{resfile} has {chunkId} of type {chunkContentType} compression={chunkCompressionType} packedlength={chunkPackedLength} unpacked={chunkUnpackedLength} at file address 0x{AddressOfBlockStart.ToString("x").ToUpper()} {diff}");
+                        Debug.Print($"{resfile} has {chunkId} of type {chunkContentType} compression={chunkCompressionType} packedlength={chunkPackedLength} unpacked={chunkUnpackedLength} at file address 0x{AddressOfBlockStart.ToString("x").ToUpper()}");
+
                         // }                        
 
                         AddressOfBlockStart = AddressOfBlockStart + chunkPackedLength;

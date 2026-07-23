@@ -35,17 +35,6 @@ namespace FreeFall
                     //}
                 }
             }
-
-            // for (int x = 0; x <= hasRendered.GetUpperBound(0); x++)
-            // {
-            //     for (int y = 0; y <= hasRendered.GetUpperBound(0); y++)
-            //     {
-            //         if ((hasRendered[x, y] == false) && (textures[x, y])== 3)
-            //         {
-            //             Debug.Print($"tile {x},{y} with texture {textures[x, y]} of count {texturecounts[textures[x, y]]} was not rendered");
-            //         }
-            //     }
-            // }
         }
 
 
