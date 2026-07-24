@@ -9,6 +9,9 @@ namespace FreeFall
     {
         //public static string path = "c:\\games\\tnova\\TNF108\\MAPS\\MAP1.RES";
         public static ImageTexture[] PlanetTextures = new ImageTexture[64];
+        public static ImageTexture[] SkyTexture = new ImageTexture[1];
+        public static int SkyHeight;
+
         const int chunkToLoad = 86;
         public static int[,] height = new int[513, 513];
         public static int[,] texture = new int[513, 513];
@@ -31,7 +34,7 @@ namespace FreeFall
 
                 address_pointer = 0;
                 int meshcount = 1;
-                long maxHeight = 0; long minHeight = 0;
+                int maxHeight = 0; int minHeight = 0;
                 //for (int x = 0; x <=height.GetUpperBound(0); x++)
 
                 for (int y = 0; y <= height.GetUpperBound(1); y++)
@@ -80,6 +83,7 @@ namespace FreeFall
                         }
                     }
                 }
+                SkyHeight = maxHeight + 256;//temp
                 if (outputfilename != "")
                 {
                     var img = Godot.Image.CreateEmpty(513, 513, false, Image.Format.Rf);
@@ -130,13 +134,9 @@ namespace FreeFall
                     addr_ptr += 0x52;
                 }
                 //var debugcolor = new Color(b: 255, r: 0, g: 0);
-                for (int i = 0; i <= 0; i++)
-                {
-                    var img = Artloader.Image(databuffer: tex_ark.data, dataOffSet: addr_ptr, width: 256, height: 256, palette: TexturePalette, useAlphaChannel: false, useSingleRedChannel: false);
-                    img.GetImage().SavePng($"c:\\temp\\tnova\\textures\\{skyname}_{i.ToString("d2")}.png");
-                    addr_ptr += (64 * 64);
-                    PlanetTextures[i] = img;
-                }
+                var img = Artloader.Image(databuffer: tex_ark.data, dataOffSet: addr_ptr, width: 256, height: 256, palette: TexturePalette, useAlphaChannel: false, useSingleRedChannel: false);
+                img.GetImage().SavePng($"c:\\temp\\tnova\\textures\\{skyname}.png");  
+                SkyTexture[0] = img;  
             }
             return true;
         }

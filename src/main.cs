@@ -91,6 +91,8 @@ public partial class main : Node
 			texturecounts: TNovaMapLoader.texturecounter, 
 			rotations: TNovaMapLoader.rotations);
 
+			
+
 		//Resloader.FindDataInRes("c:\\games\\tnova\\PLNT0.PAL", "c:\\games\\tnova\\data\\RESGAME.RES", 255 * 3);
 		//palchunk_351.dat
 		//Resloader.FindDataInRes("c:\\games\\tnova\\PLNT1.PAL","c:\\temp\\tnova\\palchunk_351.dat", 255);

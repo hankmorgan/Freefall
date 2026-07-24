@@ -35,6 +35,61 @@ namespace FreeFall
                     }
                 }
             }
+            RenderSky(the_tiles);
+        }
+
+        static void RenderSky(Node3D the_tiles)
+        {           
+
+            //Allocate enough verticea and UVs for the faces
+            Vector3[] verts = new Vector3[4];
+            Vector2[] uvs = new Vector2[4];
+            float baseHeight = (float)(TNovaMapLoader.SkyHeight / HeightScale);
+
+            //Now allocate the visible faces to triangles.
+            int FaceCounter = 0;//Tracks which number face we are now on.
+
+
+
+            verts[0 + (4 * FaceCounter)] = new Vector3(0f - 1024f, baseHeight,512f + (1.2f * 512f));
+            verts[1 + (4 * FaceCounter)] = new Vector3(0f - 1024f, baseHeight, 0f - 1024f);
+            verts[2 + (4 * FaceCounter)] = new Vector3(1024f + (1.2f * 512f), baseHeight, 0f - 1024f);
+            verts[3 + (4 * FaceCounter)] = new Vector3(1024f + (1.2f * 512f), baseHeight, 1024f + (1.2f * 512f));
+            //Change default UVs
+            uvs[0 + (4 * FaceCounter)] = new Vector2(0.0f, 0.0f);
+            uvs[1 + (4 * FaceCounter)] = new Vector2(0.0f, 1.0f * 4);
+            uvs[2 + (4 * FaceCounter)] = new Vector2(4, 1.0f * 4);
+            uvs[3 + (4 * FaceCounter)] = new Vector2(4, 0.0f);
+
+            var normals = new List<Vector3>();
+            foreach (var vert in verts)
+            {
+                normals.Add(vert.Normalized());
+            }
+
+            //Apply the uvs and create my tris
+
+            FaceCounter = 0;
+            int[] indices = new int[6];
+            indices[0] = 2 + (4 * FaceCounter);
+            indices[1] = 1 + (4 * FaceCounter);
+            indices[2] = 0 + (4 * FaceCounter);
+            indices[3] = 3 + (4 * FaceCounter);
+            indices[4] = 2 + (4 * FaceCounter);
+            indices[5] = 0 + (4 * FaceCounter);
+
+            
+            var a_mesh = new ArrayMesh();
+            TilemapRender.DrawMesh(
+                the_tiles: the_tiles,
+                textureToDraw:0,
+                textures: TNovaMapLoader.SkyTexture,
+                surfIdx: 0,
+                a_mesh: a_mesh,
+                NoOfLoops: 0,
+                verts: verts,
+                uvs: uvs,
+                indices: indices);
         }
 
 
@@ -180,6 +235,7 @@ namespace FreeFall
                     TilemapRender.DrawMesh(
                         the_tiles: the_tiles,
                         textureToDraw: textureToDraw,
+                        textures: TNovaMapLoader.PlanetTextures,
                         surfIdx: 0,
                         a_mesh: a_mesh,
                         NoOfLoops: NoOfLoops,
@@ -199,7 +255,7 @@ namespace FreeFall
             }//loop
         }
 
-        private static void DrawMesh(Node3D the_tiles, int textureToDraw, int surfIdx, ArrayMesh a_mesh, int NoOfLoops, Vector3[] verts, Vector2[] uvs, int[] indices)
+        private static void DrawMesh(Node3D the_tiles, int textureToDraw, ImageTexture[] textures, int surfIdx, ArrayMesh a_mesh, int NoOfLoops, Vector3[] verts, Vector2[] uvs, int[] indices)
         {
             var normals = new List<Vector3>();
             foreach (var vert in verts)
@@ -211,6 +267,7 @@ namespace FreeFall
                 verts: verts,
                 uvs: uvs,
                 textureindex: textureToDraw,
+                textures: textures,
                 a_mesh: a_mesh,
                 normals: normals,
                 indices: indices,
@@ -229,7 +286,7 @@ namespace FreeFall
         /// <param name="a_mesh"></param>
         /// <param name="normals"></param>
         /// <param name="indices"></param>
-        private static void AddSurfaceToMesh(Vector3[] verts, Vector2[] uvs, int textureindex, ArrayMesh a_mesh, List<Vector3> normals, int[] indices, int surfIdx)
+        private static void AddSurfaceToMesh(Vector3[] verts, Vector2[] uvs, ImageTexture[] textures, int textureindex, ArrayMesh a_mesh, List<Vector3> normals, int[] indices, int surfIdx )
         {
             var surfaceArray = new Godot.Collections.Array();
             surfaceArray.Resize((int)Mesh.ArrayType.Max);
@@ -242,7 +299,7 @@ namespace FreeFall
             var mat = new ShaderMaterial();
             mat.Shader = tileshader;
             //add the texture          
-            mat.SetShaderParameter("texture_albedo", (Texture)TNovaMapLoader.PlanetTextures[textureindex]);
+            mat.SetShaderParameter("texture_albedo", (Texture)textures[textureindex]);
             mat.SetShaderParameter("albedo", new Color(1, 1, 1, 1));
             mat.SetShaderParameter("uv1_scale", new Vector3(1, 1, 1));
             mat.SetShaderParameter("uv2_scale", new Vector3(1, 1, 1));
