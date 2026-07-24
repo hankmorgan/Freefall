@@ -107,26 +107,43 @@ namespace FreeFall
             }
         }
 
-        public static bool LoadPlanetTextures(string planetresfile, string planetname, Palette overridepal = null, string palettename = "PLNT0.PAL")
-        {
-            var p = File.ReadAllBytes($"C:\\Games\\TNOVA\\{palettename}");
-            //var p = ResourceLoader.Load($"res://resources/palettes/{palettename}"); //TODO figure out how to load the bundled .PAL (or ideally find the palette.)
 
-            Palette GreyScaleIndexPalette;// = new Palette();
-            if (overridepal == null)
+        public static bool LoadSky(string skyresfile,string skyname, Palette overridepal = null, string palettename = "PLNT0.PAL")
+        {
+            Palette TexturePalette = PickPalette(overridepal, palettename);
+
+            byte[] archive_ark;
+
+            if (ReadStreamFile(skyresfile, out archive_ark))
             {
-                GreyScaleIndexPalette = new Palette();
-                for (int i = 0; i <= GreyScaleIndexPalette.blue.GetUpperBound(0); i++)
+                Resloader.Chunk tex_ark;
+                if (!Resloader.LoadChunk(archive_ark, 152, out tex_ark))
                 {
-                    GreyScaleIndexPalette.red[i] = p[(i * 3) + 0];// (byte)i;
-                    GreyScaleIndexPalette.green[i] = p[(i * 3) + 1];// 0;
-                    GreyScaleIndexPalette.blue[i] = p[(i * 3) + 2];// 0;                              
+                    return false;
+                }
+
+                File.WriteAllBytes($"c:\\temp\\tnova\\textures\\skyname_152.dat", tex_ark.data);
+                int addr_ptr = 0;
+                if (tex_ark.chunkCompressionType == 2)
+                {
+                    //the data is in a uncompressed subdir. I'm not sure currently of the header format of subdirs. but I do not the sky is a 256*256 image at offset 0x52 within the subchunk
+                    addr_ptr += 0x52;
+                }
+                //var debugcolor = new Color(b: 255, r: 0, g: 0);
+                for (int i = 0; i <= 0; i++)
+                {
+                    var img = Artloader.Image(databuffer: tex_ark.data, dataOffSet: addr_ptr, width: 256, height: 256, palette: TexturePalette, useAlphaChannel: false, useSingleRedChannel: false);
+                    img.GetImage().SavePng($"c:\\temp\\tnova\\textures\\{skyname}_{i.ToString("d2")}.png");
+                    addr_ptr += (64 * 64);
+                    PlanetTextures[i] = img;
                 }
             }
-            else
-            {
-                GreyScaleIndexPalette = overridepal;
-            }
+            return true;
+        }
+
+        public static bool LoadPlanetTextures(string planetresfile, string planetname, Palette overridepal = null, string palettename = "PLNT0.PAL")
+        {
+            Palette TexturePalette = PickPalette(overridepal, palettename);
 
             byte[] archive_ark;
 
@@ -141,7 +158,7 @@ namespace FreeFall
                 var debugcolor = new Color(b: 255, r: 0, g: 0);
                 for (int i = 0; i <= 63; i++)
                 {
-                    var img = Artloader.Image(databuffer: tex_ark.data, dataOffSet: addr_ptr, width: 64, height: 64, palette: GreyScaleIndexPalette, useAlphaChannel: false, useSingleRedChannel: false);
+                    var img = Artloader.Image(databuffer: tex_ark.data, dataOffSet: addr_ptr, width: 64, height: 64, palette: TexturePalette, useAlphaChannel: false, useSingleRedChannel: false);
                     img.GetImage().SavePng($"c:\\temp\\tnova\\textures\\{planetname}_{i.ToString("d2")}.png");
                     addr_ptr += (64 * 64);
                     // var baseimg = img.GetImage();
@@ -167,6 +184,30 @@ namespace FreeFall
                 }
             }
             return true;
+        }
+
+        private static Palette PickPalette(Palette overridepal, string palettename)
+        {
+            var p = File.ReadAllBytes($"C:\\Games\\TNOVA\\{palettename}");
+            //var p = ResourceLoader.Load($"res://resources/palettes/{palettename}"); //TODO figure out how to load the bundled .PAL (or ideally find the palette.)
+
+            Palette GreyScaleIndexPalette;// = new Palette();
+            if (overridepal == null)
+            {
+                GreyScaleIndexPalette = new Palette();
+                for (int i = 0; i <= GreyScaleIndexPalette.blue.GetUpperBound(0); i++)
+                {
+                    GreyScaleIndexPalette.red[i] = p[(i * 3) + 0];// (byte)i;
+                    GreyScaleIndexPalette.green[i] = p[(i * 3) + 1];// 0;
+                    GreyScaleIndexPalette.blue[i] = p[(i * 3) + 2];// 0;                              
+                }
+            }
+            else
+            {
+                GreyScaleIndexPalette = overridepal;
+            }
+
+            return GreyScaleIndexPalette;
         }
     }//end class
 }//end 

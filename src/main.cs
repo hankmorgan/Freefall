@@ -35,7 +35,7 @@ public partial class main : Node
 
 		var enumoptions = new EnumerationOptions();
 		enumoptions.RecurseSubdirectories = true;
-		files = System.IO.Directory.EnumerateFiles(path: "c:\\games\\tnova\\", searchPattern: "RESPLNT*.res", enumerationOptions: enumoptions);
+		files = System.IO.Directory.EnumerateFiles(path: "c:\\games\\tnova\\", searchPattern: "SKY*.res", enumerationOptions: enumoptions);
 		foreach (var file in files)
 		{
 			var chunks = Resloader.EnumerateResFile(file);
@@ -79,6 +79,11 @@ public partial class main : Node
 		TNovaMapLoader.LoadPlanetTextures(
 			planetresfile: "c:\\games\\tnova\\data\\RESPLNT0.RES",
 			planetname: "planet0");
+
+
+		TNovaMapLoader.LoadSky(
+			skyresfile: "c:\\games\\tnova\\data\\SKY0.RES",
+			skyname: "sky0");			
 
 		TilemapRender.RenderTileMap(
 			tileheights: TNovaMapLoader.height, 
