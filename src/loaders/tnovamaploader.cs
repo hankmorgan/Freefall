@@ -12,6 +12,7 @@ namespace FreeFall
         const int chunkToLoad = 86;
         public static int[,] height = new int[513, 513];
         public static int[,] texture = new int[513, 513];
+        public static int[,] rotations = new int[513, 513];
         public static int[,] texturecounter = new int[63, 4]; //counts usages of each texture x rotation
 
         public static bool LoadTNovaMap(string sourcearkfile, string outputfilename = "")
@@ -55,6 +56,7 @@ namespace FreeFall
                         texture[x, y] = byte0;
 
                         var rot = (byte1 >> 2) & 0x3;
+                        rotations[x, y] = rot;
                         //var shade = byte1 & 0x3;
                         texturecounter[byte0, rot]++;
 
@@ -89,7 +91,7 @@ namespace FreeFall
                         {
                             var normaliseheight = (float)(height[x, y] - minHeight);
                             var color = new Godot.Color(r: normaliseheight / normalisemaxheight, g: 0, b: 0);
-                            color = new Color(r: (float)texture[x, y] * 8f / 255f, g: (float)texture[x, y] * 8f / 255f, b: (float)texture[x, y] * 8f / 255f);
+                            color = new Color(r: (float)texture[x, y] * 8f / 255f, g: color.G, b: (float)rotations[x, y] * 32f / 255f);
                             img.SetPixel(x, y, color);
                         }
                     }
@@ -142,31 +144,27 @@ namespace FreeFall
                     var img = Artloader.Image(databuffer: tex_ark.data, dataOffSet: addr_ptr, width: 64, height: 64, palette: GreyScaleIndexPalette, useAlphaChannel: false, useSingleRedChannel: false);
                     img.GetImage().SavePng($"c:\\temp\\tnova\\textures\\{planetname}_{i.ToString("d2")}.png");
                     addr_ptr += (64 * 64);
-                    var baseimg = img.GetImage();
-                    for (int x = 0; x < 64; x++)
-                    {
-                        baseimg.SetPixel(x, 0, debugcolor);
-                    }
-                    baseimg.SetPixel(1, 1, debugcolor);
-                    for (int x = 0; x < 10; x++)
-                    {
-                        baseimg.SetPixel(x, 2, debugcolor);
-                    }
-                    baseimg.SetPixel(2, 2, debugcolor);
-                    baseimg.SetPixel(3, 3, debugcolor);
-                    baseimg.SetPixel(4, 4, debugcolor);
-                    for (int y = 0; y < 32; y++)
-                    {
-                        baseimg.SetPixel(0, y, debugcolor);
-                    }
-                    var tex = new ImageTexture();
-                    tex.SetImage(baseimg);
-
-                    PlanetTextures[i] = tex;
+                    // var baseimg = img.GetImage();
+                    // for (int x = 0; x < 64; x++)
+                    // {
+                    //     baseimg.SetPixel(x, 0, debugcolor);
+                    // }
+                    // baseimg.SetPixel(1, 1, debugcolor);
+                    // for (int x = 0; x < 10; x++)
+                    // {
+                    //     baseimg.SetPixel(x, 2, debugcolor);
+                    // }
+                    // baseimg.SetPixel(2, 2, debugcolor);
+                    // baseimg.SetPixel(3, 3, debugcolor);
+                    // baseimg.SetPixel(4, 4, debugcolor);
+                    // for (int y = 0; y < 32; y++)
+                    // {
+                    //     baseimg.SetPixel(0, y, debugcolor);
+                    // }
+                    // var tex = new ImageTexture();
+                    // tex.SetImage(baseimg);
+                    PlanetTextures[i] = img;
                 }
-
-
-                //File.WriteAllBytes("c:\\temp\\tnova\\test.dat", tex_ark.data);
             }
             return true;
         }

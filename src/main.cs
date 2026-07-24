@@ -74,13 +74,17 @@ public partial class main : Node
 
 		//PaletteLoader.LoadPalette(palettefile: "c:\\games\\tnova\\data\\RESGAME.RES", chunkid: 351, 0);
 
-		TNovaMapLoader.LoadTNovaMap("c:\\games\\tnova\\TNF108\\MAPS\\ARENA.RES", "c:\\temp\\testmap.png");
-		//a compliant loader will pull the plant from the map file.
+		TNovaMapLoader.LoadTNovaMap("c:\\games\\tnova\\TNF108\\MAPS\\COAST.RES", "c:\\temp\\testmap.png");
+		//a compliant loader will pull the planet from the map file.
 		TNovaMapLoader.LoadPlanetTextures(
 			planetresfile: "c:\\games\\tnova\\data\\RESPLNT0.RES",
 			planetname: "planet0");
 
-		TilemapRender.RenderTileMap(TNovaMapLoader.height, TNovaMapLoader.texture, TNovaMapLoader.texturecounter);
+		TilemapRender.RenderTileMap(
+			tileheights: TNovaMapLoader.height, 
+			textures: TNovaMapLoader.texture, 
+			texturecounts: TNovaMapLoader.texturecounter, 
+			rotations: TNovaMapLoader.rotations);
 
 		//Resloader.FindDataInRes("c:\\games\\tnova\\PLNT0.PAL", "c:\\games\\tnova\\data\\RESGAME.RES", 255 * 3);
 		//palchunk_351.dat

@@ -11,15 +11,16 @@ namespace FreeFall
         static bool[,] hasRendered = new bool[513, 513];
         const int FacesPerBatch = 256;
         const float brushSize = 1.2f;
+        const float HeightScale = 12f;
         static Shader tileshader;
-        public static void RenderTileMap(int[,] tileheights, int[,] textures, int[,] texturecounts)
+        public static void RenderTileMap(int[,] tileheights, int[,] textures, int[,] texturecounts, int[,] rotations)
         {
             Node3D the_tiles = main.instance.GetNode<Node3D>("/root/Freefall/Planet");
             tileshader = (Shader)ResourceLoader.Load("res://resources/shaders/tnovashader.gdshader");
             //for each tile.
             for (int tex = 0; tex <= texturecounts.GetUpperBound(0); tex++)
             {
-                for (int rot = 0; rot <= 0; rot++)
+                for (int rot = 0; rot <= texturecounts.GetUpperBound(1); rot++)
                 {
                     if (texturecounts[tex, rot] > 0)
                     {
@@ -27,6 +28,7 @@ namespace FreeFall
                             the_tiles: the_tiles,
                             tileheights: tileheights,
                             textures: textures,
+                            rotations: rotations,
                             texturecounts: texturecounts,
                             textureToDraw: tex,
                             rotation: rot);
@@ -36,7 +38,7 @@ namespace FreeFall
         }
 
 
-        static void RenderTerrainTile(Node3D the_tiles, int[,] tileheights, int[,] textures, int[,] texturecounts, int textureToDraw, int rotation)
+        static void RenderTerrainTile(Node3D the_tiles, int[,] tileheights, int[,] textures, int[,] rotations, int[,] texturecounts, int textureToDraw, int rotation)
         {
             int numberOfFaces = texturecounts[textureToDraw, rotation];
             int NoOfLoops = numberOfFaces / FacesPerBatch;
@@ -75,37 +77,37 @@ namespace FreeFall
                 {
                     for (int y = starty; y <= 512; y++)
                     {
-                        if (textures[x, y] == textureToDraw)
+                        if ((textures[x, y] == textureToDraw) && (rotations[x,y] == rotation))
                         {
                             DrawMesh = true;
                             if (hasRendered[x, y] == false)
                             {
-                                heights[0] = (float)+tileheights[x, y] / 10f;
+                                heights[0] = (float)+tileheights[x, y] / HeightScale;
                                 if (y == 512)
                                 {
-                                    heights[1] = (float)+tileheights[x, y] / 10f;
+                                    heights[1] = (float)+tileheights[x, y] / HeightScale;
                                 }
                                 else
                                 {
-                                    heights[1] = (float)+tileheights[x, y + 1] / 10f;
+                                    heights[1] = (float)+tileheights[x, y + 1] / HeightScale;
                                 }
 
                                 if ((x == 512) || (y == 512))
                                 {
-                                    heights[2] = (float)+tileheights[x, y] / 10f;
+                                    heights[2] = (float)+tileheights[x, y] / HeightScale;
                                 }
                                 else
                                 {
-                                    heights[2] = (float)+tileheights[x + 1, y + 1] / 10f;
+                                    heights[2] = (float)+tileheights[x + 1, y + 1] / HeightScale;
                                 }
 
                                 if (x == 512)
                                 {
-                                    heights[3] = (float)+tileheights[x, y] / 10f;
+                                    heights[3] = (float)+tileheights[x, y] / HeightScale;
                                 }
                                 else
                                 {
-                                    heights[3] = (float)+tileheights[x + 1, y] / 10f;
+                                    heights[3] = (float)+tileheights[x + 1, y] / HeightScale;
                                 }
 
                                 float cornerX = (float)x * brushSize;
@@ -120,22 +122,22 @@ namespace FreeFall
                                 switch (rotation)
                                 {
                                     case 3:
+                                        uvs[2 + (FaceCounter * 4)] = new Vector2(0.0f, 0.0f);
+                                        uvs[3 + (FaceCounter * 4)] = new Vector2(+1.0f, 0.0f);
+                                        uvs[0 + (FaceCounter * 4)] = new Vector2(+1.0f, -1.0f);
+                                        uvs[1 + (FaceCounter * 4)] = new Vector2(0.0f, -1.0f);
+                                        break;
+                                    case 2:
                                         uvs[3 + (FaceCounter * 4)] = new Vector2(0.0f, 0.0f);
                                         uvs[0 + (FaceCounter * 4)] = new Vector2(+1.0f, 0.0f);
                                         uvs[1 + (FaceCounter * 4)] = new Vector2(+1.0f, -1.0f);
                                         uvs[2 + (FaceCounter * 4)] = new Vector2(0.0f, -1.0f);
                                         break;
-                                    case 2:
+                                    case 1:
                                         uvs[0 + (FaceCounter * 4)] = new Vector2(0.0f, 0.0f);
                                         uvs[1 + (FaceCounter * 4)] = new Vector2(+1.0f, 0.0f);
                                         uvs[2 + (FaceCounter * 4)] = new Vector2(+1.0f, -1.0f);
                                         uvs[3 + (FaceCounter * 4)] = new Vector2(0.0f, -1.0f);
-                                        break;
-                                    case 1:
-                                        uvs[2 + (FaceCounter * 4)] = new Vector2(0.0f, 0.0f);
-                                        uvs[3 + (FaceCounter * 4)] = new Vector2(+1.0f, 0.0f);
-                                        uvs[0 + (FaceCounter * 4)] = new Vector2(+1.0f, -1.0f);
-                                        uvs[1 + (FaceCounter * 4)] = new Vector2(0.0f, -1.0f);
                                         break;
                                     case 0:
                                     default:
