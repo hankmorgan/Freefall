@@ -30,15 +30,16 @@ namespace FreeFall
         public int minHeight = 0;
 
         /// <summary>
-        /// Size in meters of a tile
+        /// Size of a tile
         /// </summary>
-        public float UnitSize = 6;
+        public float UnitSize = 1;
 
         /// <summary>
         /// The upper array index that the height map will render.
         /// </summary>
         public int MapUpperBound;//= 512;
 
+        public bool[,] hasRendered;//= new bool[513, 513];
 
 
         /// <summary>
@@ -52,11 +53,12 @@ namespace FreeFall
             if (!HiRes)
             {
                 size = 257; 
-                UnitSize = 24f;
+                UnitSize = 4f;
             }
             height = new int[size, size];
             texture = new int[size, size];
             rotations = new int[size, size];
+            hasRendered = new bool[size, size];
             MapUpperBound = size - 1;            
         }
     }
@@ -72,7 +74,7 @@ namespace FreeFall
         const int LoResMapChunk = 85;
 
 
-        public static TNovaMap LoadTNovaMap(string sourcearkfile, bool HiRes = true, string outputfilename = "")
+        public static TNovaMap LoadTNovaMap(string sourcearkfile, bool HiRes = true, string outputfilename = "", int excludeX0 = -1, int excludeX1 = -1, int excludeY0 = -1, int excludeY1 = -1)
         {
             var map = new TNovaMap(HiRes);
             var chunktoLoad = HiResMapChunk;
@@ -92,13 +94,13 @@ namespace FreeFall
                 }
 
                 address_pointer = 0;
-                int meshcount = 1;
+                //int meshcount = 1;
 
                 for (int y = 0; y <= map.height.GetUpperBound(1); y++)
                 {
                     for (int x = 0; x <= map.height.GetUpperBound(0); x++)
                     {
-                        meshcount++;
+                        //meshcount++;
                         int byte0 = (int)getAt(lev_ark.data, address_pointer++, 8);//Texture
                         int byte1 = (int)getAt(lev_ark.data, address_pointer++, 8);//Rotation and part of height
                         int byte2 = (int)getAt(lev_ark.data, address_pointer++, 8);//Object object list index?
@@ -135,6 +137,17 @@ namespace FreeFall
                         if (map.height[x, y] < map.minHeight)
                         {
                             map.minHeight = map.height[x, y];
+                        }
+
+                        //Handle excluding rendering of some of the area for low res
+                        if ( 
+                            (x >= excludeX0) && (x<=excludeX1)
+                            &&
+                            (y >= excludeY0) && (y<=excludeY1)
+                        )
+                        {
+                            map.texturecounter[byte0, rot]--;//reduce count.
+                            map.hasRendered[x,y] = true; //do not render later on.
                         }
                     }
                 }

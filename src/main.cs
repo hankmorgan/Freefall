@@ -39,7 +39,11 @@ public partial class main : Node
 		var LoResMap = TNovaMapLoader.LoadTNovaMap(
 			sourcearkfile: mapToLoad, 
 			HiRes: false, 
-			outputfilename: "c:\\temp\\testmap_lo.png");
+			outputfilename: "c:\\temp\\testmap_lo.png", 
+			excludeX0: 64, 
+			excludeX1: 191, 
+			excludeY0: 64, 
+			excludeY1: 191);
 			
 		//a compliant loader will pull the planet from the map file.
 		TNovaMapLoader.LoadPlanetTextures(
@@ -52,7 +56,14 @@ public partial class main : Node
 
 		TilemapRender.RenderTileMap(
 			map : HiResMap, 
-			renderSky: true);
+			PositionAdjustment: 64 * LoResMap.UnitSize,
+			renderSky: true, 
+			Root: "/root/Freefall/Planet/HiRes");
+
+		TilemapRender.RenderTileMap(
+			map : LoResMap, 
+			renderSky: false, 
+			Root: "/root/Freefall/Planet/LoRes");
 
 	}
 

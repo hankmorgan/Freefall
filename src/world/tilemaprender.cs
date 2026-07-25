@@ -6,16 +6,14 @@ using Godot;
 namespace FreeFall
 {
     public class TilemapRender
-    {
-
-        static bool[,] hasRendered = new bool[513, 513];
+    {        
         const int FacesPerBatch = 256;
         //const float brushSize = 1.2f;
         const float HeightScale = 12f;
         static Shader tileshader;
-        public static void RenderTileMap(TNovaMap map, bool renderSky = false)
+        public static void RenderTileMap(TNovaMap map, string Root, bool renderSky = false, float PositionAdjustment = 0f)
         {
-            Node3D the_tiles = main.instance.GetNode<Node3D>("/root/Freefall/Planet");
+            Node3D the_tiles = main.instance.GetNode<Node3D>(Root);//"/root/Freefall/Planet");
             tileshader = (Shader)ResourceLoader.Load("res://resources/shaders/tnovashader.gdshader");
             //for each tile.
             for (int tex = 0; tex <= map.texturecounter.GetUpperBound(0); tex++)
@@ -28,7 +26,8 @@ namespace FreeFall
                             the_tiles: the_tiles,
                             map: map,
                             textureToDraw: tex,
-                            rotation: rot);
+                            rotation: rot, 
+                            PositionAdjustment: PositionAdjustment );
                     }
                 }
             }
@@ -94,7 +93,7 @@ namespace FreeFall
         }
 
 
-        static void RenderTerrainSurface(Node3D the_tiles, TNovaMap map, int textureToDraw, int rotation)
+        static void RenderTerrainSurface(Node3D the_tiles, TNovaMap map, int textureToDraw, int rotation, float PositionAdjustment)
         {
             float brushSize = map.UnitSize;
             int numberOfFaces = map.texturecounter[textureToDraw, rotation];
@@ -137,7 +136,7 @@ namespace FreeFall
                         if ((map.texture[x, y] == textureToDraw) && (map.rotations[x,y] == rotation))
                         {
                             DrawMesh = true;
-                            if (hasRendered[x, y] == false)
+                            if (map.hasRendered[x, y] == false)
                             {
                                 heights[0] = (float)+map.height[x, y] / HeightScale;
                                 if (y ==  map.MapUpperBound)
@@ -167,8 +166,8 @@ namespace FreeFall
                                     heights[3] = (float)+map.height[x + 1, y] / HeightScale;
                                 }
 
-                                float cornerX = (float)x * brushSize;
-                                float cornerY = (float)y * brushSize;
+                                float cornerX = PositionAdjustment + (float)x * brushSize;
+                                float cornerY = PositionAdjustment + (float)y * brushSize;
 
                                 verts[0 + (FaceCounter * 4)] = new Vector3(cornerX + 0.0f, heights[0], cornerY + 0.0f); //0,0
                                 verts[1 + (FaceCounter * 4)] = new Vector3(cornerX + 0.0f, heights[1], cornerY + brushSize); // 0, 1
@@ -213,7 +212,7 @@ namespace FreeFall
                                 indices[4 + (FaceCounter * 6)] = 2 + (FaceCounter * 4);
                                 indices[5 + (FaceCounter * 6)] = 0 + (FaceCounter * 4);
 
-                                hasRendered[x, y] = true;
+                                map.hasRendered[x, y] = true;
 
                                 FaceCounter++;
                                 if (FaceCounter >= currNoOfFaces)

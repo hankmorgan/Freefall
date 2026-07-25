@@ -14,6 +14,10 @@ script = ExtResource("1_b4y2i")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.06426)
 mesh = SubResource("CylinderMesh_4eelw")
 
+[node name="HiRes" type="Node3D" parent="Planet"]
+
+[node name="LoRes" type="Node3D" parent="Planet"]
+
 [node name="CharacterBody3D" type="CharacterBody3D" parent="."]
 transform = Transform3D(-0.972715, 0, 0.232003, 0, 1, 0, -0.232003, 0, -0.972715, 290, 0, 290)
 script = ExtResource("2_e31jp")
