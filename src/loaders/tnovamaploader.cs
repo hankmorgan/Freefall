@@ -4,44 +4,96 @@ using Godot;
 
 namespace FreeFall
 {
+    public class TNovaMap
+    {
+        /// <summary>
+        /// The height of the corner of a tile.
+        /// </summary>
+        public int[,] height;// = new int[513, 513];
+
+        /// <summary>
+        /// The texture as mapped in RESLNTx.RES
+        /// </summary>
+        public int[,] texture;// = new int[513, 513];
+
+        /// <summary>
+        /// The cardinal direction of a tile.
+        /// </summary>
+        public int[,] rotations;// = new int[513, 513];
+
+        /// <summary>
+        /// counts usages of each texture and rotation
+        /// </summary>
+        public int[,] texturecounter = new int[63, 4];
+
+        public int maxHeight = 0;
+        public int minHeight = 0;
+
+        /// <summary>
+        /// Size in meters of a tile
+        /// </summary>
+        public int UnitSize = 6;
+
+        /// <summary>
+        /// The upper array index that the height map will render.
+        /// </summary>
+        public int MapUpperBound;//= 512;
+
+
+        /// <summary>
+        /// For HiRes use size = 513
+        /// </summary>
+        /// <param name="size"></param>
+        public TNovaMap(bool HiRes)
+        {
+            var size = 513;            
+            if (!HiRes)
+            {
+                size = 128; //?to confrm
+                UnitSize = 24;
+            }
+            height = new int[size, size];
+            texture = new int[size, size];
+            rotations = new int[size, size];
+            MapUpperBound = size - 1;            
+        }
+    }
 
     public class TNovaMapLoader : Loader
     {
         //public static string path = "c:\\games\\tnova\\TNF108\\MAPS\\MAP1.RES";
         public static ImageTexture[] PlanetTextures = new ImageTexture[64];
         public static ImageTexture[] SkyTexture = new ImageTexture[1];
-        public static int SkyHeight;
+        //public static int SkyHeight;
 
-        const int chunkToLoad = 86;
-        public static int[,] height = new int[513, 513];
-        public static int[,] texture = new int[513, 513];
-        public static int[,] rotations = new int[513, 513];
-        public static int[,] texturecounter = new int[63, 4]; //counts usages of each texture x rotation
+        const int HiResMapChunk = 86;
+        const int LoResMapChunk = 86;
 
-        public static bool LoadTNovaMap(string sourcearkfile, string outputfilename = "")
+
+        public static TNovaMap LoadTNovaMap(string sourcearkfile, bool HiRes = true, string outputfilename = "")
         {
-
+            var map = new TNovaMap(HiRes);
             //float brushSize = 12f;
             byte[] archive_ark;
             if (ReadStreamFile(sourcearkfile, out archive_ark))
             {
                 long address_pointer = 0;
                 Resloader.Chunk lev_ark;
-                if (!Resloader.LoadChunk(archive_ark, chunkToLoad, out lev_ark))
+                if (!Resloader.LoadChunk(archive_ark, HiResMapChunk, out lev_ark))
                 {
-                    return false;
+                    return null;
                 }
 
                 address_pointer = 0;
                 int meshcount = 1;
-                int maxHeight = 0; int minHeight = 0;
+
                 //for (int x = 0; x <=height.GetUpperBound(0); x++)
 
-                for (int y = 0; y <= height.GetUpperBound(1); y++)
+                for (int y = 0; y <= map.height.GetUpperBound(1); y++)
                 //for (int y = height.GetUpperBound(1); y >= 0; y--)
                 {
                     //for (int x = height.GetUpperBound(0); x >=0; x--) 
-                    for (int x = 0; x <= height.GetUpperBound(0); x++)
+                    for (int x = 0; x <= map.height.GetUpperBound(0); x++)
                     {
                         meshcount++;
                         int byte0 = (int)getAt(lev_ark.data, address_pointer++, 8);//Texture
@@ -56,63 +108,63 @@ namespace FreeFall
                         if (byte0 > 63)
                             byte0 = byte0 - 64;
 
-                        texture[x, y] = byte0;
+                        map.texture[x, y] = byte0;
 
                         var rot = (byte1 >> 2) & 0x3;
-                        rotations[x, y] = rot;
+                        map.rotations[x, y] = rot;
                         //var shade = byte1 & 0x3;
-                        texturecounter[byte0, rot]++;
+                        map.texturecounter[byte0, rot]++;
 
                         byte1 = byte1 & 0xF0;         //AND with 11110000b: remove shadow+rotation in lower half of byte
-                        height[x, y] = (byte2 << 4) | (byte1 >> 4);
+                        map.height[x, y] = (byte2 << 4) | (byte1 >> 4);
                         if (byte2 > 0x7F)            //negative height
-                        { height[x, y] = height[x, y] - 4096; }
+                        { map.height[x, y] = map.height[x, y] - 4096; }
                         //height[x,y] =height[x,y] + 2048;
                         if ((x == 0) && (y == 0))
                         {
-                            maxHeight = height[x, y];
-                            minHeight = height[x, y];
+                            map.maxHeight = map.height[x, y];
+                            map.minHeight = map.height[x, y];
                         }
-                        if (height[x, y] > maxHeight)
+                        if (map.height[x, y] > map.maxHeight)
                         {
-                            maxHeight = height[x, y];
+                            map.maxHeight = map.height[x, y];
                         }
-                        if (height[x, y] < minHeight)
+                        if (map.height[x, y] < map.minHeight)
                         {
-                            minHeight = height[x, y];
+                            map.minHeight = map.height[x, y];
                         }
                     }
                 }
-                SkyHeight = maxHeight + 256;//temp
+                //SkyHeight = map.maxHeight + 256;//temp
                 if (outputfilename != "")
                 {
                     var img = Godot.Image.CreateEmpty(513, 513, false, Image.Format.Rf);
                     //export as a height map
-                    var normalisemaxheight = (float)(maxHeight - minHeight);
-                    for (int x = 0; x <= height.GetUpperBound(0); x++)
+                    var normalisemaxheight = (float)(map.maxHeight - map.minHeight);
+                    for (int x = 0; x <= map.height.GetUpperBound(0); x++)
                     {
-                        for (int y = 0; y <= height.GetUpperBound(1); y++)
+                        for (int y = 0; y <= map.height.GetUpperBound(1); y++)
                         {
-                            var normaliseheight = (float)(height[x, y] - minHeight);
+                            var normaliseheight = (float)(map.height[x, y] - map.minHeight);
                             var color = new Godot.Color(r: normaliseheight / normalisemaxheight, g: 0, b: 0);
-                            color = new Color(r: (float)texture[x, y] * 8f / 255f, g: color.G, b: (float)rotations[x, y] * 32f / 255f);
+                            //color = new Color(r: (float)map.texture[x, y] * 8f / 255f, g: color.G, b: (float)map.rotations[x, y] * 32f / 255f);
                             img.SetPixel(x, y, color);
                         }
                     }
                     img.SetPixel(0, 0, new Color(0, 0, 0));
                     img.SavePng(outputfilename);
                 }
-                return true;
+                return map;
 
             }
             else
             {
-                return false;
+                return null;
             }
         }
 
 
-        public static bool LoadSky(string skyresfile,string skyname, Palette overridepal = null, string palettename = "PLNT0.PAL")
+        public static bool LoadSky(string skyresfile, string skyname, Palette overridepal = null, string palettename = "PLNT0.PAL")
         {
             Palette TexturePalette = PickPalette(overridepal, palettename);
 
@@ -135,8 +187,8 @@ namespace FreeFall
                 }
                 //var debugcolor = new Color(b: 255, r: 0, g: 0);
                 var img = Artloader.Image(databuffer: tex_ark.data, dataOffSet: addr_ptr, width: 256, height: 256, palette: TexturePalette, useAlphaChannel: false, useSingleRedChannel: false);
-                img.GetImage().SavePng($"c:\\temp\\tnova\\textures\\{skyname}.png");  
-                SkyTexture[0] = img;  
+                img.GetImage().SavePng($"c:\\temp\\tnova\\textures\\{skyname}.png");
+                SkyTexture[0] = img;
             }
             return true;
         }

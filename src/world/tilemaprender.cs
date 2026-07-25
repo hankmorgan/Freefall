@@ -13,38 +13,39 @@ namespace FreeFall
         const float brushSize = 1.2f;
         const float HeightScale = 12f;
         static Shader tileshader;
-        public static void RenderTileMap(int[,] tileheights, int[,] textures, int[,] texturecounts, int[,] rotations)
+        public static void RenderTileMap(TNovaMap map, bool renderSky = false)
         {
             Node3D the_tiles = main.instance.GetNode<Node3D>("/root/Freefall/Planet");
             tileshader = (Shader)ResourceLoader.Load("res://resources/shaders/tnovashader.gdshader");
             //for each tile.
-            for (int tex = 0; tex <= texturecounts.GetUpperBound(0); tex++)
+            for (int tex = 0; tex <= map.texturecounter.GetUpperBound(0); tex++)
             {
-                for (int rot = 0; rot <= texturecounts.GetUpperBound(1); rot++)
+                for (int rot = 0; rot <=  map.texturecounter.GetUpperBound(1); rot++)
                 {
-                    if (texturecounts[tex, rot] > 0)
+                    if ( map.texturecounter[tex, rot] > 0)
                     {
-                        RenderTerrainTile(
+                        RenderTerrainSurface(
                             the_tiles: the_tiles,
-                            tileheights: tileheights,
-                            textures: textures,
-                            rotations: rotations,
-                            texturecounts: texturecounts,
+                            map: map,
                             textureToDraw: tex,
                             rotation: rot);
                     }
                 }
             }
-            RenderSky(the_tiles);
+            if (renderSky)
+            {
+                RenderSky(the_tiles, map.maxHeight + 256);    
+            }
+            
         }
 
-        static void RenderSky(Node3D the_tiles)
+        static void RenderSky(Node3D the_tiles, int SkyHeight)
         {           
 
             //Allocate enough verticea and UVs for the faces
             Vector3[] verts = new Vector3[4];
             Vector2[] uvs = new Vector2[4];
-            float baseHeight = (float)(TNovaMapLoader.SkyHeight / HeightScale);
+            float baseHeight = (float)(SkyHeight / HeightScale);
 
             //Now allocate the visible faces to triangles.
             int FaceCounter = 0;//Tracks which number face we are now on.
@@ -93,9 +94,9 @@ namespace FreeFall
         }
 
 
-        static void RenderTerrainTile(Node3D the_tiles, int[,] tileheights, int[,] textures, int[,] rotations, int[,] texturecounts, int textureToDraw, int rotation)
+        static void RenderTerrainSurface(Node3D the_tiles, TNovaMap map, int textureToDraw, int rotation)
         {
-            int numberOfFaces = texturecounts[textureToDraw, rotation];
+            int numberOfFaces = map.texturecounter[textureToDraw, rotation];
             int NoOfLoops = numberOfFaces / FacesPerBatch;
             int remainder = numberOfFaces % FacesPerBatch;
 
@@ -132,37 +133,37 @@ namespace FreeFall
                 {
                     for (int y = starty; y <= 512; y++)
                     {
-                        if ((textures[x, y] == textureToDraw) && (rotations[x,y] == rotation))
+                        if ((map.texture[x, y] == textureToDraw) && (map.rotations[x,y] == rotation))
                         {
                             DrawMesh = true;
                             if (hasRendered[x, y] == false)
                             {
-                                heights[0] = (float)+tileheights[x, y] / HeightScale;
+                                heights[0] = (float)+map.height[x, y] / HeightScale;
                                 if (y == 512)
                                 {
-                                    heights[1] = (float)+tileheights[x, y] / HeightScale;
+                                    heights[1] = (float)+map.height[x, y] / HeightScale;
                                 }
                                 else
                                 {
-                                    heights[1] = (float)+tileheights[x, y + 1] / HeightScale;
+                                    heights[1] = (float)+map.height[x, y + 1] / HeightScale;
                                 }
 
                                 if ((x == 512) || (y == 512))
                                 {
-                                    heights[2] = (float)+tileheights[x, y] / HeightScale;
+                                    heights[2] = (float)+map.height[x, y] / HeightScale;
                                 }
                                 else
                                 {
-                                    heights[2] = (float)+tileheights[x + 1, y + 1] / HeightScale;
+                                    heights[2] = (float)+map.height[x + 1, y + 1] / HeightScale;
                                 }
 
                                 if (x == 512)
                                 {
-                                    heights[3] = (float)+tileheights[x, y] / HeightScale;
+                                    heights[3] = (float)+map.height[x, y] / HeightScale;
                                 }
                                 else
                                 {
-                                    heights[3] = (float)+tileheights[x + 1, y] / HeightScale;
+                                    heights[3] = (float)+map.height[x + 1, y] / HeightScale;
                                 }
 
                                 float cornerX = (float)x * brushSize;
