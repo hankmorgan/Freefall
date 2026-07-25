@@ -6,9 +6,8 @@ using Godot;
 namespace FreeFall
 {
     public class TilemapRender
-    {        
+    {
         const int FacesPerBatch = 256;
-        //const float brushSize = 1.2f;
         const float HeightScale = 12f;
         static Shader tileshader;
         public static void RenderTileMap(TNovaMap map, string Root, bool renderSky = false, float PositionAdjustment = 0f)
@@ -18,28 +17,28 @@ namespace FreeFall
             //for each tile.
             for (int tex = 0; tex <= map.texturecounter.GetUpperBound(0); tex++)
             {
-                for (int rot = 0; rot <=  map.texturecounter.GetUpperBound(1); rot++)
+                for (int rot = 0; rot <= map.texturecounter.GetUpperBound(1); rot++)
                 {
-                    if ( map.texturecounter[tex, rot] > 0)
+                    if (map.texturecounter[tex, rot] > 0)
                     {
                         RenderTerrainSurface(
                             the_tiles: the_tiles,
                             map: map,
                             textureToDraw: tex,
-                            rotation: rot, 
-                            PositionAdjustment: PositionAdjustment );
+                            rotation: rot,
+                            PositionAdjustment: PositionAdjustment);
                     }
                 }
             }
             if (renderSky)
             {
-                RenderSky(the_tiles, map.maxHeight + 256);    
+                RenderSky(the_tiles, map.maxHeight + 256);
             }
-            
+
         }
 
         static void RenderSky(Node3D the_tiles, int SkyHeight)
-        {           
+        {
 
             //Allocate enough verticea and UVs for the faces
             Vector3[] verts = new Vector3[4];
@@ -51,7 +50,7 @@ namespace FreeFall
 
 
 
-            verts[0 + (4 * FaceCounter)] = new Vector3(0f - 1024f, baseHeight,512f + (1.2f * 512f));
+            verts[0 + (4 * FaceCounter)] = new Vector3(0f - 1024f, baseHeight, 512f + (1.2f * 512f));
             verts[1 + (4 * FaceCounter)] = new Vector3(0f - 1024f, baseHeight, 0f - 1024f);
             verts[2 + (4 * FaceCounter)] = new Vector3(1024f + (1.2f * 512f), baseHeight, 0f - 1024f);
             verts[3 + (4 * FaceCounter)] = new Vector3(1024f + (1.2f * 512f), baseHeight, 1024f + (1.2f * 512f));
@@ -78,11 +77,11 @@ namespace FreeFall
             indices[4] = 2 + (4 * FaceCounter);
             indices[5] = 0 + (4 * FaceCounter);
 
-            
+
             var a_mesh = new ArrayMesh();
             TilemapRender.DrawMesh(
                 the_tiles: the_tiles,
-                textureToDraw:0,
+                textureToDraw: 0,
                 textures: TNovaMapLoader.SkyTexture,
                 surfIdx: 0,
                 a_mesh: a_mesh,
@@ -131,15 +130,15 @@ namespace FreeFall
 
                 for (int x = startx; x <= map.MapUpperBound; x++)
                 {
-                    for (int y = starty; y <=  map.MapUpperBound; y++)
+                    for (int y = starty; y <= map.MapUpperBound; y++)
                     {
-                        if ((map.texture[x, y] == textureToDraw) && (map.rotations[x,y] == rotation))
+                        if ((map.texture[x, y] == textureToDraw) && (map.rotations[x, y] == rotation))
                         {
                             DrawMesh = true;
                             if (map.hasRendered[x, y] == false)
                             {
                                 heights[0] = (float)+map.height[x, y] / HeightScale;
-                                if (y ==  map.MapUpperBound)
+                                if (y == map.MapUpperBound)
                                 {
                                     heights[1] = (float)+map.height[x, y] / HeightScale;
                                 }
@@ -173,6 +172,7 @@ namespace FreeFall
                                 verts[1 + (FaceCounter * 4)] = new Vector3(cornerX + 0.0f, heights[1], cornerY + brushSize); // 0, 1
                                 verts[2 + (FaceCounter * 4)] = new Vector3(cornerX + brushSize, heights[2], cornerY + brushSize); // 1, 1
                                 verts[3 + (FaceCounter * 4)] = new Vector3(cornerX + brushSize, heights[3], cornerY + 0.0f); // 1, 0
+
 
 
                                 switch (rotation)
@@ -287,7 +287,7 @@ namespace FreeFall
         /// <param name="a_mesh"></param>
         /// <param name="normals"></param>
         /// <param name="indices"></param>
-        private static void AddSurfaceToMesh(Vector3[] verts, Vector2[] uvs, ImageTexture[] textures, int textureindex, ArrayMesh a_mesh, List<Vector3> normals, int[] indices, int surfIdx )
+        private static void AddSurfaceToMesh(Vector3[] verts, Vector2[] uvs, ImageTexture[] textures, int textureindex, ArrayMesh a_mesh, List<Vector3> normals, int[] indices, int surfIdx)
         {
             var surfaceArray = new Godot.Collections.Array();
             surfaceArray.Resize((int)Mesh.ArrayType.Max);

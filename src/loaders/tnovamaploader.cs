@@ -6,25 +6,27 @@ namespace FreeFall
 {
     public class TNovaMap
     {
+        public const float HiResUnitSize = 1f;
+        
         /// <summary>
         /// The height of the corner of a tile.
         /// </summary>
-        public int[,] height;// = new int[513, 513];
+        public short[,] height;// = new int[513, 513];
 
         /// <summary>
         /// The texture as mapped in RESLNTx.RES
         /// </summary>
-        public int[,] texture;// = new int[513, 513];
+        public byte[,] texture;// = new int[513, 513];
 
         /// <summary>
         /// The cardinal direction of a tile.
         /// </summary>
-        public int[,] rotations;// = new int[513, 513];
+        public byte[,] rotations;// = new int[513, 513];
 
         /// <summary>
         /// counts usages of each texture and rotation
         /// </summary>
-        public int[,] texturecounter = new int[64, 4];
+        public short[,] texturecounter = new short[64, 4];
 
         public int maxHeight = 0;
         public int minHeight = 0;
@@ -32,7 +34,7 @@ namespace FreeFall
         /// <summary>
         /// Size of a tile
         /// </summary>
-        public float UnitSize = 1;
+        public float UnitSize;
 
         /// <summary>
         /// The upper array index that the height map will render.
@@ -49,18 +51,23 @@ namespace FreeFall
         public TNovaMap(bool HiRes)
         {
             var size = 513;   
-       
+            UnitSize= HiResUnitSize;
             if (!HiRes)
             {
                 size = 257; 
                 UnitSize = 4f;
             }
-            height = new int[size, size];
-            texture = new int[size, size];
-            rotations = new int[size, size];
+            height = new short[size, size];
+            texture = new byte[size, size];
+            rotations = new byte[size, size];
             hasRendered = new bool[size, size];
             MapUpperBound = size - 1;            
         }
+    }
+
+    public class TreeMap
+    {
+        int[,] trees;
     }
 
     public class TNovaMapLoader : Loader
@@ -70,8 +77,10 @@ namespace FreeFall
         public static ImageTexture[] SkyTexture = new ImageTexture[1];
         //public static int SkyHeight;
 
-        const int HiResMapChunk = 86;
-        const int LoResMapChunk = 85;
+        const short HiResMapChunk = 86;
+        const short LoResMapChunk = 85;
+
+        const short TreeMapTrunk = 83;
 
 
         public static TNovaMap LoadTNovaMap(string sourcearkfile, bool HiRes = true, string outputfilename = "", int excludeX0 = -1, int excludeX1 = -1, int excludeY0 = -1, int excludeY1 = -1)
@@ -113,17 +122,17 @@ namespace FreeFall
                         if (byte0 > 63)
                             byte0 = byte0 - 64;
 
-                        map.texture[x, y] = byte0;
+                        map.texture[x, y] = (byte)byte0;
 
                         var rot = (byte1 >> 2) & 0x3;
-                        map.rotations[x, y] = rot;
+                        map.rotations[x, y] = (byte)rot;
                         //var shade = byte1 & 0x3;
                         map.texturecounter[byte0, rot]++;
 
                         byte1 = byte1 & 0xF0;         //AND with 11110000b: remove shadow+rotation in lower half of byte
-                        map.height[x, y] = (byte2 << 4) | (byte1 >> 4);
+                        map.height[x, y] = (short)((byte2 << 4) | (byte1 >> 4));
                         if (byte2 > 0x7F)            //negative height
-                        { map.height[x, y] = map.height[x, y] - 4096; }
+                        { map.height[x, y] = (short)(map.height[x, y] - 4096); }
                         //height[x,y] =height[x,y] + 2048;
                         if ((x == 0) && (y == 0))
                         {
