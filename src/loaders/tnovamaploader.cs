@@ -7,7 +7,7 @@ namespace FreeFall
     public class TNovaMap
     {
         public const float HiResUnitSize = 1f;
-        
+
         /// <summary>
         /// The height of the corner of a tile.
         /// </summary>
@@ -50,24 +50,24 @@ namespace FreeFall
         /// <param name="size"></param>
         public TNovaMap(bool HiRes)
         {
-            var size = 513;   
-            UnitSize= HiResUnitSize;
+            var size = 513;
+            UnitSize = HiResUnitSize;
             if (!HiRes)
             {
-                size = 257; 
+                size = 257;
                 UnitSize = 4f;
             }
             height = new short[size, size];
             texture = new byte[size, size];
             rotations = new byte[size, size];
             hasRendered = new bool[size, size];
-            MapUpperBound = size - 1;            
+            MapUpperBound = size - 1;
         }
     }
 
     public class TreeMap
     {
-        int[,] trees;
+        public int[,] tree = new int[128, 128];
     }
 
     public class TNovaMapLoader : Loader
@@ -80,7 +80,7 @@ namespace FreeFall
         const short HiResMapChunk = 86;
         const short LoResMapChunk = 85;
 
-        const short TreeMapTrunk = 83;
+        const short TreeMapChunk = 83;
 
 
         public static TNovaMap LoadTNovaMap(string sourcearkfile, bool HiRes = true, string outputfilename = "", int excludeX0 = -1, int excludeX1 = -1, int excludeY0 = -1, int excludeY1 = -1)
@@ -149,14 +149,14 @@ namespace FreeFall
                         }
 
                         //Handle excluding rendering of some of the area for low res
-                        if ( 
-                            (x >= excludeX0) && (x<=excludeX1)
+                        if (
+                            (x >= excludeX0) && (x <= excludeX1)
                             &&
-                            (y >= excludeY0) && (y<=excludeY1)
+                            (y >= excludeY0) && (y <= excludeY1)
                         )
                         {
                             map.texturecounter[byte0, rot]--;//reduce count.
-                            map.hasRendered[x,y] = true; //do not render later on.
+                            map.hasRendered[x, y] = true; //do not render later on.
                         }
                     }
                 }
@@ -164,7 +164,7 @@ namespace FreeFall
                 if (outputfilename != "")
                 {
                     //export as a height map
-                    var img = Godot.Image.CreateEmpty(map.MapUpperBound + 1, map.MapUpperBound + 1, false, Image.Format.Rf);                    
+                    var img = Godot.Image.CreateEmpty(map.MapUpperBound + 1, map.MapUpperBound + 1, false, Image.Format.Rf);
                     var normalisemaxheight = (float)(map.maxHeight - map.minHeight);
                     for (int x = 0; x <= map.height.GetUpperBound(0); x++)
                     {
@@ -176,11 +176,69 @@ namespace FreeFall
                             img.SetPixel(x, y, color);
                         }
                     }
-                    img.SetPixel(0, 0, new Color(0, 0, 0));
                     img.SavePng(outputfilename);
                 }
                 return map;
 
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+
+        public static TreeMap LoadTreeMap(string sourcearkfile, bool HiRes = true, string outputfilename = "")
+        {
+            var map = new TreeMap();
+
+            //float brushSize = 12f;
+            byte[] archive_ark;
+            if (ReadStreamFile(sourcearkfile, out archive_ark))
+            {
+                long address_pointer = 0;
+                Resloader.Chunk lev_ark;
+                if (!Resloader.LoadChunk(archive_ark: archive_ark, chunkNo: TreeMapChunk, data_ark: out lev_ark))
+                {
+                    return null;
+                }
+
+                address_pointer = 0;
+                //int meshcount = 1;
+
+                for (int y = 0; y <= map.tree.GetUpperBound(1); y++)
+                {
+                    for (int x = 0; x <= map.tree.GetUpperBound(0); x++)
+                    {
+                        //meshcount++;
+                        map.tree[x, y] = (int)getAt(lev_ark.data, address_pointer++, 8);//Trees                       
+                    }
+                }
+                //SkyHeight = map.maxHeight + 256;//temp
+                if (outputfilename != "")
+                {
+                    //export as a height map
+                    var img = Godot.Image.CreateEmpty(128, 128, false, Image.Format.Rf);
+                    for (int x = 0; x <= map.tree.GetUpperBound(0); x++)
+                    {
+                        for (int y = 0; y <= map.tree.GetUpperBound(1); y++)
+                        {
+                            Color color;
+                            if (map.tree[x, y] == 0)
+                            {
+                                color = new Godot.Color(r: 255f, g: 255f, b: 255f);
+                            }
+                            else
+                            {
+                                color = new Godot.Color(r: (float)map.tree[x, y] / 255f, g: 0, b: 0);
+                            }
+
+                            img.SetPixel(x, y, color);
+                        }
+                    }
+                    img.SavePng(outputfilename);
+                }
+                return map;
             }
             else
             {
@@ -234,8 +292,8 @@ namespace FreeFall
                 int addr_ptr = 0;
                 var debugcolor = new Color(b: 255, r: 0, g: 0);  //TODO the texture data not have this many textures in each map.
                 for (int i = 0; i <= 63; i++)
-                { 
-                    if (addr_ptr + (64*64) <= tex_ark.data.GetUpperBound(0))
+                {
+                    if (addr_ptr + (64 * 64) <= tex_ark.data.GetUpperBound(0))
                     {
                         var img = Artloader.Image(databuffer: tex_ark.data, dataOffSet: addr_ptr, width: 64, height: 64, palette: TexturePalette, useAlphaChannel: false, useSingleRedChannel: false);
                         img.GetImage().SavePng($"c:\\temp\\tnova\\textures\\{planetname}_{i.ToString("d2")}.png");
@@ -261,7 +319,7 @@ namespace FreeFall
                     // }
                     // var tex = new ImageTexture();
                     // tex.SetImage(baseimg);
-                    
+
                 }
             }
             return true;

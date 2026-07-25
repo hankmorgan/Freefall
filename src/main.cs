@@ -45,6 +45,10 @@ public partial class main : Node
 			excludeX1: 191, 
 			excludeY0: 64, 
 			excludeY1: 191);
+
+		var TreeMap = TNovaMapLoader.LoadTreeMap(
+				sourcearkfile: mapToLoad, 
+				outputfilename: "c:\\temp\\testmap_trees.png");
 			
 		//a compliant loader will pull the planet from the map file.
 		TNovaMapLoader.LoadPlanetTextures(
