@@ -24,7 +24,7 @@ namespace FreeFall
         /// <summary>
         /// counts usages of each texture and rotation
         /// </summary>
-        public int[,] texturecounter = new int[63, 4];
+        public int[,] texturecounter = new int[64, 4];
 
         public int maxHeight = 0;
         public int minHeight = 0;
@@ -180,7 +180,7 @@ namespace FreeFall
         }
 
 
-        public static bool LoadSky(string skyresfile, string skyname, Palette overridepal = null, string palettename = "PLNT0.PAL")
+        public static bool LoadSky(string skyresfile, string skyname, string palettename, Palette overridepal = null)
         {
             Palette TexturePalette = PickPalette(overridepal, palettename);
 
@@ -223,11 +223,15 @@ namespace FreeFall
                     return false;
                 }
                 int addr_ptr = 0;
-                var debugcolor = new Color(b: 255, r: 0, g: 0);
+                var debugcolor = new Color(b: 255, r: 0, g: 0);  //TODO the texture data not have this many textures in each map.
                 for (int i = 0; i <= 63; i++)
-                {
-                    var img = Artloader.Image(databuffer: tex_ark.data, dataOffSet: addr_ptr, width: 64, height: 64, palette: TexturePalette, useAlphaChannel: false, useSingleRedChannel: false);
-                    img.GetImage().SavePng($"c:\\temp\\tnova\\textures\\{planetname}_{i.ToString("d2")}.png");
+                { 
+                    if (addr_ptr + (64*64) <= tex_ark.data.GetUpperBound(0))
+                    {
+                        var img = Artloader.Image(databuffer: tex_ark.data, dataOffSet: addr_ptr, width: 64, height: 64, palette: TexturePalette, useAlphaChannel: false, useSingleRedChannel: false);
+                        img.GetImage().SavePng($"c:\\temp\\tnova\\textures\\{planetname}_{i.ToString("d2")}.png");
+                        PlanetTextures[i] = img;
+                    }
                     addr_ptr += (64 * 64);
                     // var baseimg = img.GetImage();
                     // for (int x = 0; x < 64; x++)
@@ -248,7 +252,7 @@ namespace FreeFall
                     // }
                     // var tex = new ImageTexture();
                     // tex.SetImage(baseimg);
-                    PlanetTextures[i] = img;
+                    
                 }
             }
             return true;

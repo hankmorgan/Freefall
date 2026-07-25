@@ -6,12 +6,12 @@ For now all this project is aiming to do is
 
 - [x] Read Terra Nova Map Files.
 - [ ] Read Terra Nova Textures and Art.
-  - [x] Textures - Can load with presupplied palettes
-  - [ ] Palettes - BLOCKED
+  - [x] Textures - Can load with presupplied palettes obtained from older Terra Nova extraction programs.
+  - [ ] Palettes - BLOCKED. I've yet to determine how TNOVA loads it's palettes. It appears palettes may be dynamically created from various blocks of data in the res files.
 - [ ] Render a Terra Nova Level.
   - [x] Render Geometry
   - [x] Render Rotated textures
-  - [ ] Render Far distance terrain
+  - [X] Render Far distance terrain
   - [x] Render skybox
   - [ ] Render trees
   - [ ] Render shading
@@ -38,3 +38,10 @@ Basically I've yet to have my eureka moment with the code. Not helped that Under
 
  See [https://github.com/hankmorgan/TerraNovaStrikeForceCentauri] for collected documentation and tools (from other projects) I have archived over the years.
 
+## Screenshots
+
+![](nova_01.png)
+![](nova_02.png)
+![](nova_03.png)
+![](nova_04.png)
+![](nova_05.png)
