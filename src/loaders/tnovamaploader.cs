@@ -32,12 +32,13 @@ namespace FreeFall
         /// <summary>
         /// Size in meters of a tile
         /// </summary>
-        public int UnitSize = 6;
+        public float UnitSize = 6;
 
         /// <summary>
         /// The upper array index that the height map will render.
         /// </summary>
         public int MapUpperBound;//= 512;
+
 
 
         /// <summary>
@@ -46,11 +47,12 @@ namespace FreeFall
         /// <param name="size"></param>
         public TNovaMap(bool HiRes)
         {
-            var size = 513;            
+            var size = 513;   
+       
             if (!HiRes)
             {
-                size = 128; //?to confrm
-                UnitSize = 24;
+                size = 257; 
+                UnitSize = 24f;
             }
             height = new int[size, size];
             texture = new int[size, size];
@@ -67,19 +69,24 @@ namespace FreeFall
         //public static int SkyHeight;
 
         const int HiResMapChunk = 86;
-        const int LoResMapChunk = 86;
+        const int LoResMapChunk = 85;
 
 
         public static TNovaMap LoadTNovaMap(string sourcearkfile, bool HiRes = true, string outputfilename = "")
         {
             var map = new TNovaMap(HiRes);
+            var chunktoLoad = HiResMapChunk;
+            if (!HiRes)
+            {
+                chunktoLoad = LoResMapChunk;
+            }
             //float brushSize = 12f;
             byte[] archive_ark;
             if (ReadStreamFile(sourcearkfile, out archive_ark))
             {
                 long address_pointer = 0;
                 Resloader.Chunk lev_ark;
-                if (!Resloader.LoadChunk(archive_ark, HiResMapChunk, out lev_ark))
+                if (!Resloader.LoadChunk(archive_ark: archive_ark, chunkNo: chunktoLoad, data_ark: out lev_ark))
                 {
                     return null;
                 }
@@ -87,12 +94,8 @@ namespace FreeFall
                 address_pointer = 0;
                 int meshcount = 1;
 
-                //for (int x = 0; x <=height.GetUpperBound(0); x++)
-
                 for (int y = 0; y <= map.height.GetUpperBound(1); y++)
-                //for (int y = height.GetUpperBound(1); y >= 0; y--)
                 {
-                    //for (int x = height.GetUpperBound(0); x >=0; x--) 
                     for (int x = 0; x <= map.height.GetUpperBound(0); x++)
                     {
                         meshcount++;
@@ -138,8 +141,8 @@ namespace FreeFall
                 //SkyHeight = map.maxHeight + 256;//temp
                 if (outputfilename != "")
                 {
-                    var img = Godot.Image.CreateEmpty(513, 513, false, Image.Format.Rf);
                     //export as a height map
+                    var img = Godot.Image.CreateEmpty(map.MapUpperBound + 1, map.MapUpperBound + 1, false, Image.Format.Rf);                    
                     var normalisemaxheight = (float)(map.maxHeight - map.minHeight);
                     for (int x = 0; x <= map.height.GetUpperBound(0); x++)
                     {

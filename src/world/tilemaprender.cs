@@ -10,7 +10,7 @@ namespace FreeFall
 
         static bool[,] hasRendered = new bool[513, 513];
         const int FacesPerBatch = 256;
-        const float brushSize = 1.2f;
+        //const float brushSize = 1.2f;
         const float HeightScale = 12f;
         static Shader tileshader;
         public static void RenderTileMap(TNovaMap map, bool renderSky = false)
@@ -96,6 +96,7 @@ namespace FreeFall
 
         static void RenderTerrainSurface(Node3D the_tiles, TNovaMap map, int textureToDraw, int rotation)
         {
+            float brushSize = map.UnitSize;
             int numberOfFaces = map.texturecounter[textureToDraw, rotation];
             int NoOfLoops = numberOfFaces / FacesPerBatch;
             int remainder = numberOfFaces % FacesPerBatch;
@@ -129,9 +130,9 @@ namespace FreeFall
                 bool DrawMesh = false;
 
 
-                for (int x = startx; x <= 512; x++)
+                for (int x = startx; x <= map.MapUpperBound; x++)
                 {
-                    for (int y = starty; y <= 512; y++)
+                    for (int y = starty; y <=  map.MapUpperBound; y++)
                     {
                         if ((map.texture[x, y] == textureToDraw) && (map.rotations[x,y] == rotation))
                         {
@@ -139,7 +140,7 @@ namespace FreeFall
                             if (hasRendered[x, y] == false)
                             {
                                 heights[0] = (float)+map.height[x, y] / HeightScale;
-                                if (y == 512)
+                                if (y ==  map.MapUpperBound)
                                 {
                                     heights[1] = (float)+map.height[x, y] / HeightScale;
                                 }
@@ -148,7 +149,7 @@ namespace FreeFall
                                     heights[1] = (float)+map.height[x, y + 1] / HeightScale;
                                 }
 
-                                if ((x == 512) || (y == 512))
+                                if ((x == map.MapUpperBound) || (y == map.MapUpperBound))
                                 {
                                     heights[2] = (float)+map.height[x, y] / HeightScale;
                                 }
@@ -157,7 +158,7 @@ namespace FreeFall
                                     heights[2] = (float)+map.height[x + 1, y + 1] / HeightScale;
                                 }
 
-                                if (x == 512)
+                                if (x == map.MapUpperBound)
                                 {
                                     heights[3] = (float)+map.height[x, y] / HeightScale;
                                 }

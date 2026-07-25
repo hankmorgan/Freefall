@@ -9,6 +9,9 @@ public partial class main : Node
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		var mapToLoad = "c:\\games\\tnova\\TNF108\\MAPS\\COAST.RES";
+		var planetToLoad = "c:\\games\\tnova\\data\\RESPLNT0.RES";
+		var skyToLoad = "c:\\games\\tnova\\data\\SKY0.RES";
 		instance = this;
 		// var files = System.IO.Directory.EnumerateFiles("c:\\games\\tnova\\TNF108\\MAPS\\", "*.res");
 		// foreach (var file in files)
@@ -19,7 +22,7 @@ public partial class main : Node
 
 		var enumoptions = new EnumerationOptions();
 		enumoptions.RecurseSubdirectories = true;
-		var files = System.IO.Directory.EnumerateFiles(path: "c:\\games\\tnova\\", searchPattern: "SKY*.res", enumerationOptions: enumoptions);
+		var files = System.IO.Directory.EnumerateFiles(path: "c:\\games\\tnova\\", searchPattern: "COAST.RES", enumerationOptions: enumoptions);
 		foreach (var file in files)
 		{
 			var chunks = Resloader.EnumerateResFile(file);
@@ -29,20 +32,27 @@ public partial class main : Node
 
 		// Load the hi-res map
 		var HiResMap = TNovaMapLoader.LoadTNovaMap(
-			sourcearkfile: "c:\\games\\tnova\\TNF108\\MAPS\\COAST.RES", 
+			sourcearkfile: mapToLoad, 
 			HiRes: true, 
 			outputfilename: "c:\\temp\\testmap.png");
+
+		var LoResMap = TNovaMapLoader.LoadTNovaMap(
+			sourcearkfile: mapToLoad, 
+			HiRes: false, 
+			outputfilename: "c:\\temp\\testmap_lo.png");
 			
 		//a compliant loader will pull the planet from the map file.
 		TNovaMapLoader.LoadPlanetTextures(
-			planetresfile: "c:\\games\\tnova\\data\\RESPLNT0.RES",
+			planetresfile: planetToLoad,
 			planetname: "planet0");
 
 		TNovaMapLoader.LoadSky(
-			skyresfile: "c:\\games\\tnova\\data\\SKY0.RES",
+			skyresfile: skyToLoad,
 			skyname: "sky0");			
 
-		TilemapRender.RenderTileMap(map : HiResMap, renderSky: true);
+		TilemapRender.RenderTileMap(
+			map : HiResMap, 
+			renderSky: true);
 
 	}
 
