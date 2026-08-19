@@ -10,13 +10,14 @@ namespace FreeFall
     /// </summary>
     public class Resloader : Loader
     {
-        public struct Chunk
+
+        public struct Chunk  //this needs to move into a table that supports subdirs
         {
             public int chunkUnpackedLength;
             public int chunkCompressionType;//compression type
             public int chunkPackedLength;
             public int chunkContentType;
-            public byte[] data;
+            public byte[] data;    
         };
 
         public static bool LoadChunk(byte[] archive_ark, int chunkNo, out Chunk data_ark)
@@ -51,7 +52,7 @@ namespace FreeFall
             if (AddressOfBlockStart == -1) { return -1; }
 
             //if (chunkType ==1)
-            switch (chunkType)
+            switch (chunkType & 0x3)
             {
                 case 0://Flat uncompressed
                     {
@@ -77,26 +78,26 @@ namespace FreeFall
                     {
                         //uncompress the sub chunks
                         int NoOfEntries = (int)getAt(archive_ark, AddressOfBlockStart, 16);
-                        int SubDirLength = (NoOfEntries + 1) * 4 + 2;
+                        int SubDirHeaderLength = (NoOfEntries + 1) * 4 + 2;
                         byte[] temp_ark = new byte[chunkPackedLength];
                         byte[] tmpchunk = new byte[chunkUnpackedLength];
                         for (long k = 0; k < chunkPackedLength; k++)
                         {
-                            temp_ark[k] = archive_ark[AddressOfBlockStart + k + SubDirLength];
+                            temp_ark[k] = archive_ark[AddressOfBlockStart + k + SubDirHeaderLength];
                         }
                         unpack_data(pack: temp_ark, unpack: ref tmpchunk, unpacksize: chunkUnpackedLength);
                         //Merge my subdir and uncompressed subdir data back together.
-                        for (long k = 0; k < SubDirLength; k++)
+                        for (long k = 0; k < SubDirHeaderLength; k++)
                         {//Subdir
                             OutputChunk[k] = archive_ark[AddressOfBlockStart + k];
                         }
-                        for (long k = SubDirLength; k < chunkUnpackedLength; k++)
+                        for (long k = SubDirHeaderLength; k < chunkUnpackedLength; k++)
                         {//Subdir
-                            OutputChunk[k] = tmpchunk[k - SubDirLength];
+                            OutputChunk[k] = tmpchunk[k - SubDirHeaderLength];
                         }
                         return chunkUnpackedLength;
                     }
-                case 2://Subdir uncompressed, return the data to be loaded seperately.
+                case 2://Subdir uncompressed, return the subchunk data to be loaded seperately.
                 default://Uncompressed. 
                     {                        
                         for (long k = 0; k < chunkUnpackedLength; k++)

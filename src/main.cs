@@ -28,8 +28,8 @@ public partial class main : Node
 		var files = System.IO.Directory.EnumerateFiles(path: "c:\\games\\tnova\\", searchPattern: "*.RES", enumerationOptions: enumoptions);
 		foreach (var file in files)
 		{
-			byte[]arkdata;
-			var chunks = Resloader.EnumerateResFile(file, out arkdata);
+			//byte[]arkdata;
+			//var chunks = Resloader.EnumerateResFile(file, out arkdata);
 			// foreach (var chunk in chunks)
 			// {
 
@@ -48,7 +48,7 @@ public partial class main : Node
 		}
 
 		//PaletteLoader.LoadPalette(palettefile: "c:\\games\\tnova\\data\\RESGAME.RES", chunkid: 351, 0);
-	return;
+
 		// Load the hi-res map
 		var HiResMap = TNovaMapLoader.LoadTNovaMap(
 			sourcearkfile: mapToLoad, 
