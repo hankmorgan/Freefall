@@ -84,7 +84,7 @@ namespace FreeFall
                         {
                             temp_ark[k] = archive_ark[AddressOfBlockStart + k + SubDirLength];
                         }
-                        unpack_data(temp_ark, ref tmpchunk, chunkUnpackedLength);
+                        unpack_data(pack: temp_ark, unpack: ref tmpchunk, unpacksize: chunkUnpackedLength);
                         //Merge my subdir and uncompressed subdir data back together.
                         for (long k = 0; k < SubDirLength; k++)
                         {//Subdir
@@ -289,12 +289,13 @@ namespace FreeFall
         /// Browses the content of a .res file and lists what it contains.
         /// </summary>
         /// <param name="resfile"></param>
-        public static List<int> EnumerateResFile(string resfile)
-        {
+        public static List<int> EnumerateResFile(string resfile, out byte[] data)
+        {            
             var result = new List<int>();
             if (System.IO.File.Exists(resfile))
             {
                 var tmp_ark = File.ReadAllBytes(resfile);
+                data = tmp_ark;
                 if (tmp_ark.Length > 124)
                 {
                     var DirectoryAddress = getAt(tmp_ark, 124, 32);
@@ -315,7 +316,7 @@ namespace FreeFall
                         //if ((chunkUnpackedLength == 1024) ||  (chunkUnpackedLength == 768))
                         // {
                         //var diff = AddressOfBlockStart - 0x8D78D;
-                        Debug.Print($"{resfile} has {chunkId} of type {chunkContentType} compression={chunkCompressionType} packedlength={chunkPackedLength} unpacked={chunkUnpackedLength} at file address 0x{AddressOfBlockStart.ToString("x").ToUpper()}");
+                        Debug.Print($"{resfile} has {chunkId} of type {chunkContentType} compression={chunkCompressionType} packedlength={chunkPackedLength} unpacked={chunkUnpackedLength} at file address 0x{AddressOfBlockStart.ToString("x").ToUpper()}   Chunk {chunkId} {System.IO.Path.GetFileName(resfile)}");
 
                         // }                        
 
@@ -327,6 +328,10 @@ namespace FreeFall
                         address_pointer = address_pointer + 10;
                     }
                 }
+            }
+            else
+            {
+                data = null;
             }
             return result;
         }

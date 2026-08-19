@@ -2,6 +2,8 @@ using Godot;
 
 using FreeFall;
 using System.IO;
+using System.Net;
+using System.Reflection.Metadata;
 
 public partial class main : Node
 {
@@ -23,14 +25,30 @@ public partial class main : Node
 
 		var enumoptions = new EnumerationOptions();
 		enumoptions.RecurseSubdirectories = true;
-		var files = System.IO.Directory.EnumerateFiles(path: "c:\\games\\tnova\\", searchPattern: "COAST.RES", enumerationOptions: enumoptions);
+		var files = System.IO.Directory.EnumerateFiles(path: "c:\\games\\tnova\\", searchPattern: "*.RES", enumerationOptions: enumoptions);
 		foreach (var file in files)
 		{
-			var chunks = Resloader.EnumerateResFile(file);
+			byte[]arkdata;
+			var chunks = Resloader.EnumerateResFile(file, out arkdata);
+			// foreach (var chunk in chunks)
+			// {
+
+			// 	Resloader.Chunk chunkdata;
+            //     if (Resloader.LoadChunk(archive_ark: arkdata, chunkNo: chunk, data_ark: out chunkdata))
+            //     {
+			// 		var pathout = System.IO.Path.Combine("C:\\Temp\\unpacked", $"{System.IO.Path.GetFileNameWithoutExtension(file)}", $"{chunk}");
+			// 		var dir = System.IO.Path.GetDirectoryName(pathout);
+			// 		if (!Path.Exists(dir))
+			// 		{
+			// 			System.IO.Directory.CreateDirectory(dir);
+			// 		}
+            //         System.IO.File.WriteAllBytes(pathout, chunkdata.data);
+            //     }
+			// }
 		}
 
 		//PaletteLoader.LoadPalette(palettefile: "c:\\games\\tnova\\data\\RESGAME.RES", chunkid: 351, 0);
-
+	return;
 		// Load the hi-res map
 		var HiResMap = TNovaMapLoader.LoadTNovaMap(
 			sourcearkfile: mapToLoad, 
