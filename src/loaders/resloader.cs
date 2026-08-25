@@ -76,6 +76,7 @@ namespace FreeFall
 
                 case 3://Subdir compressed
                     {
+                        Debug.Print("Subdir compressed! I'm not expecting this!");
                         //uncompress the sub chunks
                         int NoOfEntries = (int)getAt(archive_ark, AddressOfBlockStart, 16);
                         int SubDirHeaderLength = (NoOfEntries + 1) * 4 + 2;
@@ -314,10 +315,19 @@ namespace FreeFall
                         var chunkCompressionType = (int)getAt(tmp_ark, address_pointer + 5, 8);  //Compression.
                         var chunkPackedLength = (int)getAt(tmp_ark, address_pointer + 6, 24);
                         var chunkContentType = (short)getAt(tmp_ark, address_pointer + 9, 8);
+                        string isCompressed = "";
+                        switch (chunkCompressionType & 0x3)
+                        {
+                            case 0: isCompressed = "Flat Uncompressed";break;
+                            case 1: isCompressed = "Flat Compressed";break; //not known to occur in tnova. (yay!)
+                            case 2: isCompressed = "Subdir Uncompressed";break;
+                            case 3: isCompressed = "Subdir Compressed";break;   //not known to occur in tnova. (yay!)
+                        }
+
                         //if ((chunkUnpackedLength == 1024) ||  (chunkUnpackedLength == 768))
                         // {
                         //var diff = AddressOfBlockStart - 0x8D78D;
-                        Debug.Print($"{resfile} has {chunkId} of type {chunkContentType} compression={chunkCompressionType} packedlength={chunkPackedLength} unpacked={chunkUnpackedLength} at file address 0x{AddressOfBlockStart.ToString("x").ToUpper()}   Chunk {chunkId} {System.IO.Path.GetFileName(resfile)}");
+                        Debug.Print($"{resfile} has {chunkId} of type {chunkContentType} compression={chunkCompressionType} ({isCompressed}) packedlength={chunkPackedLength} unpacked={chunkUnpackedLength} at file address 0x{AddressOfBlockStart.ToString("x").ToUpper()}   Chunk {chunkId} {System.IO.Path.GetFileName(resfile)}");
 
                         // }                        
 

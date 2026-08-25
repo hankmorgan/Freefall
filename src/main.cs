@@ -28,23 +28,23 @@ public partial class main : Node
 		var files = System.IO.Directory.EnumerateFiles(path: "c:\\games\\tnova\\", searchPattern: "*.RES", enumerationOptions: enumoptions);
 		foreach (var file in files)
 		{
-			//byte[]arkdata;
-			//var chunks = Resloader.EnumerateResFile(file, out arkdata);
-			// foreach (var chunk in chunks)
-			// {
+			byte[]arkdata;
+			var chunks = Resloader.EnumerateResFile(file, out arkdata);
+			foreach (var chunk in chunks)
+			{
 
-			// 	Resloader.Chunk chunkdata;
-            //     if (Resloader.LoadChunk(archive_ark: arkdata, chunkNo: chunk, data_ark: out chunkdata))
-            //     {
-			// 		var pathout = System.IO.Path.Combine("C:\\Temp\\unpacked", $"{System.IO.Path.GetFileNameWithoutExtension(file)}", $"{chunk}");
-			// 		var dir = System.IO.Path.GetDirectoryName(pathout);
-			// 		if (!Path.Exists(dir))
-			// 		{
-			// 			System.IO.Directory.CreateDirectory(dir);
-			// 		}
-            //         System.IO.File.WriteAllBytes(pathout, chunkdata.data);
-            //     }
-			// }
+				Resloader.Chunk chunkdata;
+                if (Resloader.LoadChunk(archive_ark: arkdata, chunkNo: chunk, data_ark: out chunkdata))
+                {
+					// var pathout = System.IO.Path.Combine("C:\\Temp\\unpacked", $"{System.IO.Path.GetFileNameWithoutExtension(file)}", $"{chunk}");
+					// var dir = System.IO.Path.GetDirectoryName(pathout);
+					// if (!Path.Exists(dir))
+					// {
+					// 	System.IO.Directory.CreateDirectory(dir);
+					// }
+                    // System.IO.File.WriteAllBytes(pathout, chunkdata.data);
+                }
+			}
 		}
 
 		//PaletteLoader.LoadPalette(palettefile: "c:\\games\\tnova\\data\\RESGAME.RES", chunkid: 351, 0);

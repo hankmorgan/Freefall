@@ -7,7 +7,7 @@ For now all this project is aiming to do is
 - [x] Read Terra Nova Map Files.
 - [ ] Read Terra Nova Textures and Art.
   - [x] Textures - Can load with presupplied palettes obtained from older Terra Nova extraction programs.
-  - [ ] Palettes - BLOCKED. I've yet to determine how TNOVA loads it's palettes. It appears palettes may be dynamically created from various blocks of data in the res files.
+  - [ ] Palettes - BLOCKED. I've yet to determine how TNOVA loads it's palettes. It appears palettes may be dynamically created from various blocks of data in the res files. I'm thinking part of the palette is standard fixed UI like the helmets and the rest is planet specific data. This gets mixed (I think) to create the final palette.
 - [ ] Render a Terra Nova Level.
   - [x] Render Geometry
   - [x] Render Rotated textures
@@ -31,8 +31,13 @@ So far all I have been able to do is
 
 Basically I've yet to have my eureka moment with the code. Not helped that Underworld was 16 bit Borland C++ and TNova is 16/32 bit Watcom compiler (with Dos4GW) so the patterns that I'm used to seeing are all changed.
 
+- Update Aug 2026
+I'm able to get some leverage with Ghidra as described above. Watcom code is different from the Borland code that I am used to working with on Underworld but getting my head around it slowly.
+Currently looking at the chunk loading logic to identify what data gets loaded and to where so I can work towards proper identification of the palette data and logic around tree loading.
+Next steps. Update my chunkloader to support subdirs properly. Fortunately TNOVA has no compressed subdirs and only uncompressed data so the process should be straightforward.
 
-> PS. I'm not interested in AI solutions to the above problems. It sucks the fun out of the experience.
+
+> PS. I'm not interested in AI solutions to the above problems. It sucks the fun out of the experience :)
 
 ## See Also
 
